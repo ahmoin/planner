@@ -30,9 +30,9 @@ export function SectionCards() {
 					<div className="line-clamp-1 flex gap-2 font-medium">
 						Trending up this month <IconTrendingUp className="size-4" />
 					</div>
-					{/* <div className="text-muted-foreground">
-						Your GPA since ...
-					</div> */}
+					<div className="text-muted-foreground">
+						Your GPA has been improved a lot since last year
+					</div>
 				</CardFooter>
 			</Card>
 			<Card className="@container/card">
