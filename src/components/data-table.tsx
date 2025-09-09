@@ -106,8 +106,8 @@ export const schema = z.object({
 	type: z.string(),
 	status: z.string(),
 	target: z.string(),
-	limit: z.string(),
-	reviewer: z.string(),
+	received: z.string(),
+	class: z.string(),
 });
 
 // Create a separate component for the drag handle
@@ -197,7 +197,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 	},
 	{
 		accessorKey: "target",
-		header: () => <div className="w-full text-right">Target</div>,
+		header: () => <div className="w-full text-right">Target Grade</div>,
 		cell: ({ row }) => (
 			<form
 				onSubmit={(e) => {
@@ -210,7 +210,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 				}}
 			>
 				<Label htmlFor={`${row.original.id}-target`} className="sr-only">
-					Target
+					Target Grade
 				</Label>
 				<Input
 					className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
@@ -221,8 +221,8 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 		),
 	},
 	{
-		accessorKey: "limit",
-		header: () => <div className="w-full text-right">Limit</div>,
+		accessorKey: "received",
+		header: () => <div className="w-full text-right">Received Grade</div>,
 		cell: ({ row }) => (
 			<form
 				onSubmit={(e) => {
@@ -234,39 +234,39 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 					});
 				}}
 			>
-				<Label htmlFor={`${row.original.id}-limit`} className="sr-only">
-					Limit
+				<Label htmlFor={`${row.original.id}-received`} className="sr-only">
+					Received Grade
 				</Label>
 				<Input
 					className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
-					defaultValue={row.original.limit}
-					id={`${row.original.id}-limit`}
+					defaultValue={row.original.received}
+					id={`${row.original.id}-received`}
 				/>
 			</form>
 		),
 	},
 	{
-		accessorKey: "reviewer",
-		header: "Reviewer",
+		accessorKey: "class",
+		header: "Class",
 		cell: ({ row }) => {
-			const isAssigned = row.original.reviewer !== "Assign reviewer";
+			const isAssigned = row.original.class !== "Assign class";
 
 			if (isAssigned) {
-				return row.original.reviewer;
+				return row.original.class;
 			}
 
 			return (
 				<>
-					<Label htmlFor={`${row.original.id}-reviewer`} className="sr-only">
-						Reviewer
+					<Label htmlFor={`${row.original.id}-class`} className="sr-only">
+						Class
 					</Label>
 					<Select>
 						<SelectTrigger
 							className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
 							size="sm"
-							id={`${row.original.id}-reviewer`}
+							id={`${row.original.id}-class`}
 						>
-							<SelectValue placeholder="Assign reviewer" />
+							<SelectValue placeholder="Assign class" />
 						</SelectTrigger>
 						<SelectContent align="end">
 							<SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
@@ -422,7 +422,7 @@ export function DataTable({
 				<TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
 					<TabsTrigger value="outline">Outline</TabsTrigger>
 					<TabsTrigger value="past-performance">
-						Past Performance <Badge variant="secondary">3</Badge>
+						Past Performance <Badge variant="secondary">1</Badge>
 					</TabsTrigger>
 					<TabsTrigger value="key-personnel">
 						Key Personnel <Badge variant="secondary">2</Badge>
@@ -764,19 +764,19 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 						</div>
 						<div className="grid grid-cols-2 gap-4">
 							<div className="flex flex-col gap-3">
-								<Label htmlFor="target">Target</Label>
+								<Label htmlFor="target">Target Grade</Label>
 								<Input id="target" defaultValue={item.target} />
 							</div>
 							<div className="flex flex-col gap-3">
-								<Label htmlFor="limit">Limit</Label>
-								<Input id="limit" defaultValue={item.limit} />
+								<Label htmlFor="received">Received Grade</Label>
+								<Input id="received" defaultValue={item.received} />
 							</div>
 						</div>
 						<div className="flex flex-col gap-3">
-							<Label htmlFor="reviewer">Reviewer</Label>
-							<Select defaultValue={item.reviewer}>
-								<SelectTrigger id="reviewer" className="w-full">
-									<SelectValue placeholder="Select a reviewer" />
+							<Label htmlFor="class">Class</Label>
+							<Select defaultValue={item.class}>
+								<SelectTrigger id="class" className="w-full">
+									<SelectValue placeholder="Select a class" />
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="Eddie Lake">Eddie Lake</SelectItem>

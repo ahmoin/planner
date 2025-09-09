@@ -1,614 +1,146 @@
 [
 	{
 		"id": 1,
-		"assignment": "Cover page",
-		"type": "Cover page",
+		"assignment": "Intro Essay",
+		"type": "Homework",
 		"status": "In Process",
-		"target": "18",
-		"limit": "5",
-		"reviewer": "Eddie Lake"
+		"target": 85,
+		"received": 78,
+		"class": "English 5"
 	},
 	{
 		"id": 2,
-		"assignment": "Table of contents",
-		"type": "Table of contents",
+		"assignment": "Chapter 1 Quiz",
+		"type": "Homework",
 		"status": "Done",
-		"target": "29",
-		"limit": "24",
-		"reviewer": "Eddie Lake"
+		"target": 92,
+		"received": 90,
+		"class": "English 5"
 	},
 	{
 		"id": 3,
-		"assignment": "Executive summary",
-		"type": "Narrative",
+		"assignment": "Book Report",
+		"type": "Essay",
 		"status": "Done",
-		"target": "10",
-		"limit": "13",
-		"reviewer": "Eddie Lake"
+		"target": 88,
+		"received": 91,
+		"class": "English 5"
 	},
 	{
 		"id": 4,
-		"assignment": "Technical approach",
-		"type": "Narrative",
-		"status": "Done",
-		"target": "27",
-		"limit": "23",
-		"reviewer": "Jamik Tashpulatov"
+		"assignment": "Verb Conjugation",
+		"type": "Worksheet",
+		"status": "In Process",
+		"target": 86,
+		"received": 79,
+		"class": "Spanish 5"
 	},
 	{
 		"id": 5,
-		"assignment": "Design",
-		"type": "Narrative",
+		"assignment": "Grammar Project",
+		"type": "Project",
 		"status": "In Process",
-		"target": "2",
-		"limit": "16",
-		"reviewer": "Jamik Tashpulatov"
+		"target": 90,
+		"received": 82,
+		"class": "Spanish 5"
 	},
 	{
 		"id": 6,
-		"assignment": "Capabilities",
-		"type": "Narrative",
-		"status": "In Process",
-		"target": "20",
-		"limit": "8",
-		"reviewer": "Jamik Tashpulatov"
+		"assignment": "Short Essay",
+		"type": "Essay",
+		"status": "Done",
+		"target": 87,
+		"received": 89,
+		"class": "Spanish 5"
 	},
 	{
 		"id": 7,
-		"assignment": "Integration with existing systems",
-		"type": "Narrative",
-		"status": "In Process",
-		"target": "19",
-		"limit": "21",
-		"reviewer": "Jamik Tashpulatov"
+		"assignment": "Physics Lab 1",
+		"type": "Lab",
+		"status": "Done",
+		"target": 93,
+		"received": 91,
+		"class": "AP Physics C: Mechanics"
 	},
 	{
 		"id": 8,
-		"assignment": "Innovation and Advantages",
-		"type": "Narrative",
+		"assignment": "Projectile Quiz",
+		"type": "Homework",
 		"status": "Done",
-		"target": "25",
-		"limit": "26",
-		"reviewer": "Assign reviewer"
+		"target": 88,
+		"received": 84,
+		"class": "AP Physics C: Mechanics"
 	},
 	{
 		"id": 9,
-		"assignment": "Overview of EMR's Innovative Solutions",
-		"type": "Technical content",
+		"assignment": "Energy Lab",
+		"type": "Lab",
 		"status": "Done",
-		"target": "7",
-		"limit": "23",
-		"reviewer": "Assign reviewer"
+		"target": 92,
+		"received": 95,
+		"class": "AP Physics C: Mechanics"
 	},
 	{
 		"id": 10,
-		"assignment": "Advanced Algorithms and Machine Learning",
-		"type": "Narrative",
+		"assignment": "Startup Plan",
+		"type": "Project",
 		"status": "Done",
-		"target": "30",
-		"limit": "28",
-		"reviewer": "Assign reviewer"
+		"target": 90,
+		"received": 93,
+		"class": "Entrepreneurship"
 	},
 	{
 		"id": 11,
-		"assignment": "Adaptive Communication Protocols",
-		"type": "Narrative",
+		"assignment": "Market Research",
+		"type": "Essay",
 		"status": "Done",
-		"target": "9",
-		"limit": "31",
-		"reviewer": "Assign reviewer"
+		"target": 87,
+		"received": 85,
+		"class": "Entrepreneurship"
 	},
 	{
 		"id": 12,
-		"assignment": "Advantages Over Current Technologies",
-		"type": "Narrative",
-		"status": "Done",
-		"target": "12",
-		"limit": "0",
-		"reviewer": "Assign reviewer"
+		"assignment": "Business Pitch",
+		"type": "Project",
+		"status": "In Process",
+		"target": 89,
+		"received": 80,
+		"class": "Entrepreneurship"
 	},
 	{
 		"id": 13,
-		"assignment": "Past Performance",
-		"type": "Narrative",
+		"assignment": "Essay 1",
+		"type": "Essay",
 		"status": "Done",
-		"target": "22",
-		"limit": "33",
-		"reviewer": "Assign reviewer"
+		"target": 90,
+		"received": 92,
+		"class": "English 5"
 	},
 	{
 		"id": 14,
-		"assignment": "Customer Feedback and Satisfaction Levels",
-		"type": "Narrative",
+		"assignment": "Past Exam",
+		"type": "Homework",
 		"status": "Done",
-		"target": "15",
-		"limit": "34",
-		"reviewer": "Assign reviewer"
+		"target": 88,
+		"received": 86,
+		"class": "Calculus"
 	},
 	{
 		"id": 15,
-		"assignment": "Implementation Challenges and Solutions",
-		"type": "Narrative",
-		"status": "Done",
-		"target": "3",
-		"limit": "35",
-		"reviewer": "Assign reviewer"
+		"assignment": "Derivative Quiz",
+		"type": "Homework",
+		"status": "In Process",
+		"target": 91,
+		"received": 83,
+		"class": "Calculus"
 	},
 	{
 		"id": 16,
-		"assignment": "Security Measures and Data Protection Policies",
-		"type": "Narrative",
-		"status": "In Process",
-		"target": "6",
-		"limit": "36",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 17,
-		"assignment": "Scalability and Future Proofing",
-		"type": "Narrative",
+		"assignment": "Integration Lab",
+		"type": "Lab",
 		"status": "Done",
-		"target": "4",
-		"limit": "37",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 18,
-		"assignment": "Cost-Benefit Analysis",
-		"type": "Plain language",
-		"status": "Done",
-		"target": "14",
-		"limit": "38",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 19,
-		"assignment": "User Training and Onboarding Experience",
-		"type": "Narrative",
-		"status": "Done",
-		"target": "17",
-		"limit": "39",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 20,
-		"assignment": "Future Development Roadmap",
-		"type": "Narrative",
-		"status": "Done",
-		"target": "11",
-		"limit": "40",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 21,
-		"assignment": "System Architecture Overview",
-		"type": "Technical content",
-		"status": "In Process",
-		"target": "24",
-		"limit": "18",
-		"reviewer": "Maya Johnson"
-	},
-	{
-		"id": 22,
-		"assignment": "Risk Management Plan",
-		"type": "Narrative",
-		"status": "Done",
-		"target": "15",
-		"limit": "22",
-		"reviewer": "Carlos Rodriguez"
-	},
-	{
-		"id": 23,
-		"assignment": "Compliance Documentation",
-		"type": "Legal",
-		"status": "In Process",
-		"target": "31",
-		"limit": "27",
-		"reviewer": "Sarah Chen"
-	},
-	{
-		"id": 24,
-		"assignment": "API Documentation",
-		"type": "Technical content",
-		"status": "Done",
-		"target": "8",
-		"limit": "12",
-		"reviewer": "Raj Patel"
-	},
-	{
-		"id": 25,
-		"assignment": "User Interface Mockups",
-		"type": "Visual",
-		"status": "In Process",
-		"target": "19",
-		"limit": "25",
-		"reviewer": "Leila Ahmadi"
-	},
-	{
-		"id": 26,
-		"assignment": "Database Schema",
-		"type": "Technical content",
-		"status": "Done",
-		"target": "22",
-		"limit": "20",
-		"reviewer": "Thomas Wilson"
-	},
-	{
-		"id": 27,
-		"assignment": "Testing Methodology",
-		"type": "Technical content",
-		"status": "In Process",
-		"target": "17",
-		"limit": "14",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 28,
-		"assignment": "Deployment Strategy",
-		"type": "Narrative",
-		"status": "Done",
-		"target": "26",
-		"limit": "30",
-		"reviewer": "Eddie Lake"
-	},
-	{
-		"id": 29,
-		"assignment": "Budget Breakdown",
-		"type": "Financial",
-		"status": "In Process",
-		"target": "13",
-		"limit": "16",
-		"reviewer": "Jamik Tashpulatov"
-	},
-	{
-		"id": 30,
-		"assignment": "Market Analysis",
-		"type": "Research",
-		"status": "Done",
-		"target": "29",
-		"limit": "32",
-		"reviewer": "Sophia Martinez"
-	},
-	{
-		"id": 31,
-		"assignment": "Competitor Comparison",
-		"type": "Research",
-		"status": "In Process",
-		"target": "21",
-		"limit": "19",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 32,
-		"assignment": "Maintenance Plan",
-		"type": "Technical content",
-		"status": "Done",
-		"target": "16",
-		"limit": "23",
-		"reviewer": "Alex Thompson"
-	},
-	{
-		"id": 33,
-		"assignment": "User Personas",
-		"type": "Research",
-		"status": "In Process",
-		"target": "27",
-		"limit": "24",
-		"reviewer": "Nina Patel"
-	},
-	{
-		"id": 34,
-		"assignment": "Accessibility Compliance",
-		"type": "Legal",
-		"status": "Done",
-		"target": "18",
-		"limit": "21",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 35,
-		"assignment": "Performance Metrics",
-		"type": "Technical content",
-		"status": "In Process",
-		"target": "23",
-		"limit": "26",
-		"reviewer": "David Kim"
-	},
-	{
-		"id": 36,
-		"assignment": "Disaster Recovery Plan",
-		"type": "Technical content",
-		"status": "Done",
-		"target": "14",
-		"limit": "17",
-		"reviewer": "Jamik Tashpulatov"
-	},
-	{
-		"id": 37,
-		"assignment": "Third-party Integrations",
-		"type": "Technical content",
-		"status": "In Process",
-		"target": "25",
-		"limit": "28",
-		"reviewer": "Eddie Lake"
-	},
-	{
-		"id": 38,
-		"assignment": "User Feedback Summary",
-		"type": "Research",
-		"status": "Done",
-		"target": "20",
-		"limit": "15",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 39,
-		"assignment": "Localization Strategy",
-		"type": "Narrative",
-		"status": "In Process",
-		"target": "12",
-		"limit": "19",
-		"reviewer": "Maria Garcia"
-	},
-	{
-		"id": 40,
-		"assignment": "Mobile Compatibility",
-		"type": "Technical content",
-		"status": "Done",
-		"target": "28",
-		"limit": "31",
-		"reviewer": "James Wilson"
-	},
-	{
-		"id": 41,
-		"assignment": "Data Migration Plan",
-		"type": "Technical content",
-		"status": "In Process",
-		"target": "19",
-		"limit": "22",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 42,
-		"assignment": "Quality Assurance Protocols",
-		"type": "Technical content",
-		"status": "Done",
-		"target": "30",
-		"limit": "33",
-		"reviewer": "Priya Singh"
-	},
-	{
-		"id": 43,
-		"assignment": "Stakeholder Analysis",
-		"type": "Research",
-		"status": "In Process",
-		"target": "11",
-		"limit": "14",
-		"reviewer": "Eddie Lake"
-	},
-	{
-		"id": 44,
-		"assignment": "Environmental Impact Assessment",
-		"type": "Research",
-		"status": "Done",
-		"target": "24",
-		"limit": "27",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 45,
-		"assignment": "Intellectual Property Rights",
-		"type": "Legal",
-		"status": "In Process",
-		"target": "17",
-		"limit": "20",
-		"reviewer": "Sarah Johnson"
-	},
-	{
-		"id": 46,
-		"assignment": "Customer Support Framework",
-		"type": "Narrative",
-		"status": "Done",
-		"target": "22",
-		"limit": "25",
-		"reviewer": "Jamik Tashpulatov"
-	},
-	{
-		"id": 47,
-		"assignment": "Version Control Strategy",
-		"type": "Technical content",
-		"status": "In Process",
-		"target": "15",
-		"limit": "18",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 48,
-		"assignment": "Continuous Integration Pipeline",
-		"type": "Technical content",
-		"status": "Done",
-		"target": "26",
-		"limit": "29",
-		"reviewer": "Michael Chen"
-	},
-	{
-		"id": 49,
-		"assignment": "Regulatory Compliance",
-		"type": "Legal",
-		"status": "In Process",
-		"target": "13",
-		"limit": "16",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 50,
-		"assignment": "User Authentication System",
-		"type": "Technical content",
-		"status": "Done",
-		"target": "28",
-		"limit": "31",
-		"reviewer": "Eddie Lake"
-	},
-	{
-		"id": 51,
-		"assignment": "Data Analytics Framework",
-		"type": "Technical content",
-		"status": "In Process",
-		"target": "21",
-		"limit": "24",
-		"reviewer": "Jamik Tashpulatov"
-	},
-	{
-		"id": 52,
-		"assignment": "Cloud Infrastructure",
-		"type": "Technical content",
-		"status": "Done",
-		"target": "16",
-		"limit": "19",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 53,
-		"assignment": "Network Security Measures",
-		"type": "Technical content",
-		"status": "In Process",
-		"target": "29",
-		"limit": "32",
-		"reviewer": "Lisa Wong"
-	},
-	{
-		"id": 54,
-		"assignment": "Project Timeline",
-		"type": "Planning",
-		"status": "Done",
-		"target": "14",
-		"limit": "17",
-		"reviewer": "Eddie Lake"
-	},
-	{
-		"id": 55,
-		"assignment": "Resource Allocation",
-		"type": "Planning",
-		"status": "In Process",
-		"target": "27",
-		"limit": "30",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 56,
-		"assignment": "Team Structure and Roles",
-		"type": "Planning",
-		"status": "Done",
-		"target": "20",
-		"limit": "23",
-		"reviewer": "Jamik Tashpulatov"
-	},
-	{
-		"id": 57,
-		"assignment": "Communication Protocols",
-		"type": "Planning",
-		"status": "In Process",
-		"target": "15",
-		"limit": "18",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 58,
-		"assignment": "Success Metrics",
-		"type": "Planning",
-		"status": "Done",
-		"target": "30",
-		"limit": "33",
-		"reviewer": "Eddie Lake"
-	},
-	{
-		"id": 59,
-		"assignment": "Internationalization Support",
-		"type": "Technical content",
-		"status": "In Process",
-		"target": "23",
-		"limit": "26",
-		"reviewer": "Jamik Tashpulatov"
-	},
-	{
-		"id": 60,
-		"assignment": "Backup and Recovery Procedures",
-		"type": "Technical content",
-		"status": "Done",
-		"target": "18",
-		"limit": "21",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 61,
-		"assignment": "Monitoring and Alerting System",
-		"type": "Technical content",
-		"status": "In Process",
-		"target": "25",
-		"limit": "28",
-		"reviewer": "Daniel Park"
-	},
-	{
-		"id": 62,
-		"assignment": "Code Review Guidelines",
-		"type": "Technical content",
-		"status": "Done",
-		"target": "12",
-		"limit": "15",
-		"reviewer": "Eddie Lake"
-	},
-	{
-		"id": 63,
-		"assignment": "Documentation Standards",
-		"type": "Technical content",
-		"status": "In Process",
-		"target": "27",
-		"limit": "30",
-		"reviewer": "Jamik Tashpulatov"
-	},
-	{
-		"id": 64,
-		"assignment": "Release Management Process",
-		"type": "Planning",
-		"status": "Done",
-		"target": "22",
-		"limit": "25",
-		"reviewer": "Assign reviewer"
-	},
-	{
-		"id": 65,
-		"assignment": "Feature Prioritization Matrix",
-		"type": "Planning",
-		"status": "In Process",
-		"target": "19",
-		"limit": "22",
-		"reviewer": "Emma Davis"
-	},
-	{
-		"id": 66,
-		"assignment": "Technical Debt Assessment",
-		"type": "Technical content",
-		"status": "Done",
-		"target": "24",
-		"limit": "27",
-		"reviewer": "Eddie Lake"
-	},
-	{
-		"id": 67,
-		"assignment": "Capacity Planning",
-		"type": "Planning",
-		"status": "In Process",
-		"target": "21",
-		"limit": "24",
-		"reviewer": "Jamik Tashpulatov"
-	},
-	{
-		"id": 68,
-		"assignment": "Service Level Agreements",
-		"type": "Legal",
-		"status": "Done",
-		"target": "26",
-		"limit": "29",
-		"reviewer": "Assign reviewer"
+		"target": 92,
+		"received": 94,
+		"class": "Calculus"
 	}
 ]
