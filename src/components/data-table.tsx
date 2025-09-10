@@ -105,8 +105,8 @@ export const schema = z.object({
 	assignment: z.string(),
 	type: z.string(),
 	status: z.string(),
-	target: z.string(),
-	received: z.string(),
+	target: z.number(),
+	received: z.number(),
 	class: z.string(),
 });
 
