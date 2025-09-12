@@ -1,4 +1,6 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useConvexAuth } from "convex/react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
@@ -7,37 +9,9 @@ import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import data from "@/lib/mock-data.json";
 
-const title = "Ahsan Moin";
-const description = ""; // TODO: add description
-
-export const dynamic = "force-static";
-export const revalidate = false;
-
-export const metadata: Metadata = {
-	title,
-	description,
-	openGraph: {
-		images: [
-			{
-				url: `/og?title=${encodeURIComponent(
-					title,
-				)}&description=${encodeURIComponent(description)}`,
-			},
-		],
-	},
-	twitter: {
-		card: "summary_large_image",
-		images: [
-			{
-				url: `/og?title=${encodeURIComponent(
-					title,
-				)}&description=${encodeURIComponent(description)}`,
-			},
-		],
-	},
-};
-
 export default function IndexPage() {
+	const { isAuthenticated } = useConvexAuth();
+
 	return (
 		<SidebarProvider
 			style={
@@ -53,6 +27,7 @@ export default function IndexPage() {
 				<div className="flex flex-1 flex-col">
 					<div className="@container/main flex flex-1 flex-col gap-2">
 						<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+							{isAuthenticated ? "Authenticated" : "Not Authenticated"}
 							<SectionCards />
 							<div className="px-4 lg:px-6">
 								<ChartAreaInteractive />
