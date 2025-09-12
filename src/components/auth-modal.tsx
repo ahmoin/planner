@@ -31,12 +31,12 @@ export function AuthModal({
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>
-						{authFlow === "signIn" ? "Login" : "Sign up"} to draw
+						{authFlow === "signIn" ? "Login" : "Sign up"} to add assignments
 					</DialogTitle>
 					<DialogDescription>
-						Please {authFlow === "signIn" ? "login" : "sign up"} to start
-						drawing and save your work. You can explore the canvas without{" "}
-						{authFlow === "signIn" ? "logging in" : "signing up"}.
+						{authFlow === "signIn"
+							? "Please login to continue your planner and view your progress."
+							: "Please sign up to start your planner and save your progress."}
 					</DialogDescription>
 				</DialogHeader>
 				<div className="flex flex-col gap-4">
@@ -63,7 +63,7 @@ export function AuthModal({
 								fill="currentColor"
 							/>
 						</svg>
-						{authFlow === "signIn" ? "Login" : "Sign up"}. with Google
+						{authFlow === "signIn" ? "Login" : "Sign up"} with Google
 					</Button>
 					<div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
 						<span className="relative z-10 bg-background px-2 text-muted-foreground">

@@ -48,10 +48,12 @@ import {
 	useReactTable,
 	type VisibilityState,
 } from "@tanstack/react-table";
+import { useConvexAuth } from "convex/react";
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { toast } from "sonner";
 import { z } from "zod";
+import { AuthModal } from "@/components/auth-modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -332,8 +334,10 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
 
 export function DataTable({
 	data: initialData,
+	setShowAuthModal,
 }: {
 	data: z.infer<typeof schema>[];
+	setShowAuthModal: (showAuthModal: boolean) => void;
 }) {
 	const [data, setData] = React.useState(() => initialData);
 	const [rowSelection, setRowSelection] = React.useState({});
@@ -383,6 +387,14 @@ export function DataTable({
 		getFacetedRowModel: getFacetedRowModel(),
 		getFacetedUniqueValues: getFacetedUniqueValues(),
 	});
+	const { isAuthenticated } = useConvexAuth();
+
+	function handleAddAssignmentClick() {
+		if (!isAuthenticated) {
+			setShowAuthModal(true);
+			return;
+		}
+	}
 
 	function handleDragEnd(event: DragEndEvent) {
 		const { active, over } = event;
@@ -463,9 +475,13 @@ export function DataTable({
 								})}
 						</DropdownMenuContent>
 					</DropdownMenu>
-					<Button variant="outline" size="sm">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleAddAssignmentClick}
+					>
 						<IconPlus />
-						<span className="hidden lg:inline">Add Section</span>
+						<span className="hidden lg:inline">Add Assignment</span>
 					</Button>
 				</div>
 			</div>

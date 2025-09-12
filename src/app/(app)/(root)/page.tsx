@@ -1,7 +1,8 @@
 "use client";
 
-import { useConvexAuth } from "convex/react";
+import * as React from "react";
 import { AppSidebar } from "@/components/app-sidebar";
+import { AuthModal } from "@/components/auth-modal";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
@@ -10,7 +11,8 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import data from "@/lib/mock-data.json";
 
 export default function IndexPage() {
-	const { isAuthenticated } = useConvexAuth();
+	const [showAuthModal, setShowAuthModal] = React.useState(false);
+	const [authFlow, setAuthFlow] = React.useState<"signIn" | "signUp">("signUp");
 
 	return (
 		<SidebarProvider
@@ -27,16 +29,21 @@ export default function IndexPage() {
 				<div className="flex flex-1 flex-col">
 					<div className="@container/main flex flex-1 flex-col gap-2">
 						<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-							{isAuthenticated ? "Authenticated" : "Not Authenticated"}
 							<SectionCards />
 							<div className="px-4 lg:px-6">
 								<ChartAreaInteractive />
 							</div>
-							<DataTable data={data} />
+							<DataTable data={data} setShowAuthModal={setShowAuthModal} />
 						</div>
 					</div>
 				</div>
 			</SidebarInset>
+			<AuthModal
+				authFlow={authFlow}
+				setAuthFlow={setAuthFlow}
+				showAuthModal={showAuthModal}
+				setShowAuthModal={setShowAuthModal}
+			/>
 		</SidebarProvider>
 	);
 }
