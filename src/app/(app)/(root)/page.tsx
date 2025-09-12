@@ -1,6 +1,8 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import * as React from "react";
+import { api } from "@/../convex/_generated/api";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AuthModal } from "@/components/auth-modal";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
@@ -13,6 +15,7 @@ import data from "@/lib/mock-data.json";
 export default function IndexPage() {
 	const [showAuthModal, setShowAuthModal] = React.useState(false);
 	const [authFlow, setAuthFlow] = React.useState<"signIn" | "signUp">("signUp");
+	const user = useQuery(api.users.viewer);
 
 	return (
 		<SidebarProvider
@@ -23,7 +26,13 @@ export default function IndexPage() {
 				} as React.CSSProperties
 			}
 		>
-			<AppSidebar variant="inset" />
+			<AppSidebar
+				user={{
+					name: user?.name ?? "",
+					email: user?.email ?? "",
+				}}
+				variant="inset"
+			/>
 			<SidebarInset>
 				<SiteHeader />
 				<div className="flex flex-1 flex-col">

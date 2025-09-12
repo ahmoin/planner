@@ -13,7 +13,9 @@ const schema = defineSchema({
 		phoneVerificationTime: v.optional(v.number()),
 		isAnonymous: v.optional(v.boolean()),
 		// other "users" fields...
-	}).index("email", ["email"]),
+	})
+		.index("email", ["email"])
+		.index("phone", ["phone"]),
 	// Your other tables...
 });
 
