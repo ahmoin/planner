@@ -1,8 +1,10 @@
 "use client";
 
-import { type Icon, IconCirclePlusFilled, IconMail } from "@tabler/icons-react";
+import { type Icon, IconCirclePlusFilled } from "@tabler/icons-react";
+import { useMutation } from "convex/react";
+import { toast } from "sonner";
+import { api } from "@/../convex/_generated/api";
 
-import { Button } from "@/components/ui/button";
 import {
 	SidebarGroup,
 	SidebarGroupContent,
@@ -20,6 +22,31 @@ export function NavMain({
 		icon?: Icon;
 	}[];
 }) {
+	const addAssignment = useMutation(api.assignments.add);
+
+	const handleQuickCreate = async () => {
+		const tomorrow = new Date();
+		tomorrow.setDate(tomorrow.getDate() + 1);
+		tomorrow.setHours(23, 59, 0, 0);
+
+		const defaultAssignment = {
+			assignment: "Unnamed",
+			type: "Undefined",
+			status: "In Progress",
+			target: 85,
+			class: "Undefined",
+			dueDate: tomorrow.toISOString(),
+		};
+
+		try {
+			await addAssignment(defaultAssignment);
+			toast.success("Quick assignment created!");
+		} catch (error) {
+			toast.error("Failed to create assignment");
+			console.error("Quick create error:", error);
+		}
+	};
+
 	return (
 		<SidebarGroup>
 			<SidebarGroupContent className="flex flex-col gap-2">
@@ -28,18 +55,11 @@ export function NavMain({
 						<SidebarMenuButton
 							tooltip="Quick Create"
 							className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
+							onClick={handleQuickCreate}
 						>
 							<IconCirclePlusFilled />
 							<span>Quick Create</span>
 						</SidebarMenuButton>
-						<Button
-							size="icon"
-							className="size-8 group-data-[collapsible=icon]:opacity-0"
-							variant="outline"
-						>
-							<IconMail />
-							<span className="sr-only">Inbox</span>
-						</Button>
 					</SidebarMenuItem>
 				</SidebarMenu>
 				<SidebarMenu>

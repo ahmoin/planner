@@ -34,6 +34,19 @@ import {
 	IconProgress,
 	IconTimeDuration0,
 } from "@tabler/icons-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 import {
 	type ColumnDef,
 	type ColumnFiltersState,
@@ -55,6 +68,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { api } from "@/../convex/_generated/api";
 import type { Id } from "@/../convex/_generated/dataModel";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -64,7 +78,6 @@ import {
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -437,18 +450,145 @@ function getColumns(
 					row.original.status !== "Done" &&
 					row.original.received === -1;
 
+				const [date, setDate] = React.useState<Date>(
+					new Date(row.original.dueDate),
+				);
+				const [time, setTime] = React.useState(() => {
+					const d = new Date(row.original.dueDate);
+					return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+				});
+				const [isUpdating, setIsUpdating] = React.useState(false);
+				const [dialogOpen, setDialogOpen] = React.useState(false);
+				const [datePickerOpen, setDatePickerOpen] = React.useState(false);
+
+				const handleSave = async () => {
+					if (!date) {
+						setDialogOpen(false);
+						return;
+					}
+
+					setIsUpdating(true);
+					try {
+						const [hours, minutes] = time.split(":");
+						const combinedDate = new Date(date);
+						combinedDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+						await updateAssignment({
+							id: row.original.id as Id<"assignments">,
+							dueDate: combinedDate.toISOString(),
+						});
+						setDialogOpen(false);
+					} catch (error) {
+						console.error("Failed to update due date:", error);
+						setDate(new Date(row.original.dueDate));
+						const originalDate = new Date(row.original.dueDate);
+						setTime(
+							`${String(originalDate.getHours()).padStart(2, "0")}:${String(originalDate.getMinutes()).padStart(2, "0")}`,
+						);
+					} finally {
+						setIsUpdating(false);
+					}
+				};
+
+				const handleCancel = () => {
+					setDate(new Date(row.original.dueDate));
+					const originalDate = new Date(row.original.dueDate);
+					setTime(
+						`${String(originalDate.getHours()).padStart(2, "0")}:${String(originalDate.getMinutes()).padStart(2, "0")}`,
+					);
+					setDialogOpen(false);
+					setDatePickerOpen(false);
+				};
+
 				return (
-					<div
-						className={`text-sm ${isOverdue ? "text-red-600 font-medium" : ""}`}
-					>
-						<div>{dueDate.toLocaleDateString()}</div>
-						<div className="text-xs text-muted-foreground">
-							{dueDate.toLocaleTimeString([], {
-								hour: "2-digit",
-								minute: "2-digit",
-							})}
+					<>
+						{/* biome-ignore lint/a11y/noStaticElementInteractions: needed for date picker */}
+						{/* biome-ignore lint/a11y/useKeyWithClickEvents: a date picker that will appear more than once */}
+						<div
+							className={cn(
+								"text-sm cursor-pointer hover:bg-accent/50 rounded p-1 transition-colors",
+								isOverdue && "text-red-600 font-medium",
+							)}
+							onClick={() => setDialogOpen(true)}
+						>
+							<div>{dueDate.toLocaleDateString()}</div>
+							<div className="text-xs text-muted-foreground">
+								{dueDate.toLocaleTimeString([], {
+									hour: "2-digit",
+									minute: "2-digit",
+								})}
+							</div>
 						</div>
-					</div>
+
+						<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+							<DialogContent className="sm:max-w-[425px]">
+								<DialogHeader>
+									<DialogTitle>Edit Due Date</DialogTitle>
+								</DialogHeader>
+								<div className="space-y-4">
+									<div className="grid grid-cols-2 gap-4">
+										<div className="space-y-2">
+											<Label htmlFor="date-picker">Due Date</Label>
+											<Popover
+												open={datePickerOpen}
+												onOpenChange={setDatePickerOpen}
+											>
+												<PopoverTrigger asChild>
+													<Button
+														variant="outline"
+														className="w-full justify-between font-normal"
+													>
+														{date ? date.toLocaleDateString() : "Select date"}
+														<IconChevronDown className="h-4 w-4" />
+													</Button>
+												</PopoverTrigger>
+												<PopoverContent
+													className="w-auto overflow-hidden p-0"
+													align="start"
+												>
+													<Calendar
+														mode="single"
+														selected={date}
+														captionLayout="dropdown"
+														onSelect={(selectedDate) => {
+															if (selectedDate) {
+																setDate(selectedDate);
+																setDatePickerOpen(false);
+															}
+														}}
+													/>
+												</PopoverContent>
+											</Popover>
+										</div>
+
+										<div className="space-y-2">
+											<Label htmlFor="time-picker">Due Time</Label>
+											<Input
+												type="time"
+												id="time-picker"
+												value={time}
+												onChange={(e) => setTime(e.target.value)}
+												className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+											/>
+										</div>
+									</div>
+								</div>
+								<DialogFooter>
+									<Button
+										type="button"
+										variant="outline"
+										onClick={handleCancel}
+										disabled={isUpdating}
+									>
+										Cancel
+									</Button>
+									<Button onClick={handleSave} disabled={isUpdating}>
+										{isUpdating ? "Saving..." : "Save"}
+									</Button>
+								</DialogFooter>
+							</DialogContent>
+						</Dialog>
+					</>
 				);
 			},
 		},
@@ -514,12 +654,13 @@ function getColumns(
 			accessorKey: "class",
 			header: "Class",
 			cell: ({ row }) => {
-				const [selectedClass, setSelectedClass] = React.useState(
-					row.original.class,
-				);
+				const [value, setValue] = React.useState(row.original.class);
+				const [isUpdating, setIsUpdating] = React.useState(false);
 
-				const handleClassChange = async (value: string) => {
-					setSelectedClass(value);
+				const handleSave = async () => {
+					if (value === "" || value === row.original.class) return;
+
+					setIsUpdating(true);
 					try {
 						await updateAssignment({
 							id: row.original.id as Id<"assignments">,
@@ -527,38 +668,37 @@ function getColumns(
 						});
 					} catch (error) {
 						console.error("Failed to update class:", error);
-						setSelectedClass(row.original.class);
+						setValue(row.original.class);
+					} finally {
+						setIsUpdating(false);
 					}
 				};
 
-				const isAssigned = row.original.class !== "Assign class";
-
-				if (isAssigned) {
-					return row.original.class;
-				}
-
 				return (
-					<>
+					<div className="relative min-w-[120px]">
 						<Label htmlFor={`${row.original.id}-class`} className="sr-only">
 							Class
 						</Label>
-						<Select value={selectedClass} onValueChange={handleClassChange}>
-							<SelectTrigger
-								className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
-								size="sm"
-								id={`${row.original.id}-class`}
-							>
-								<SelectValue placeholder="Assign class" />
-							</SelectTrigger>
-							<SelectContent align="end">
-								<SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-								<SelectItem value="Jamik Tashpulatov">
-									Jamik Tashpulatov
-								</SelectItem>
-								<SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
-							</SelectContent>
-						</Select>
-					</>
+						<Input
+							className="border-transparent bg-transparent shadow-none hover:bg-accent/50 focus-visible:bg-background focus-visible:border-ring"
+							value={value}
+							onChange={(e) => setValue(e.target.value)}
+							onBlur={handleSave}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									e.currentTarget.blur();
+								}
+							}}
+							id={`${row.original.id}-class`}
+							disabled={isUpdating}
+							placeholder="Enter class"
+						/>
+						{isUpdating && (
+							<div className="absolute inset-0 flex items-center justify-center bg-background/50">
+								<div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+							</div>
+						)}
+					</div>
 				);
 			},
 		},
