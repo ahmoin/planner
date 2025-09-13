@@ -362,6 +362,7 @@ export default function SettingsPage() {
 					name: user?.name ?? "",
 					email: user?.email ?? "",
 				}}
+				setShowAuthModal={undefined}
 				variant="inset"
 			/>
 			<SidebarInset>

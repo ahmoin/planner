@@ -47,9 +47,12 @@ export const add = mutation({
 			}
 		}
 
+		const submittedDate = args.status === "Done" ? Date.now() : -1;
+
 		return await ctx.db.insert("assignments", {
 			...args,
 			received: -1,
+			submittedDate,
 			userId,
 			createdAt: Date.now(),
 		});
@@ -74,6 +77,7 @@ export const list = query({
 			received: assignment.received,
 			class: assignment.class,
 			dueDate: assignment.dueDate || new Date().toISOString(),
+			submittedDate: assignment.submittedDate || -1,
 		}));
 	},
 });
@@ -102,6 +106,16 @@ export const update = mutation({
 		const fieldsToUpdate = Object.fromEntries(
 			Object.entries(updateData).filter(([_, value]) => value !== undefined),
 		);
+
+		if (args.status === "Done" && assignment.status !== "Done") {
+			fieldsToUpdate.submittedDate = Date.now();
+		} else if (
+			args.status &&
+			args.status !== "Done" &&
+			assignment.status === "Done"
+		) {
+			fieldsToUpdate.submittedDate = -1;
+		}
 
 		await ctx.db.patch(id, fieldsToUpdate);
 	},

@@ -40,6 +40,7 @@ export default function IndexPage() {
 					name: user?.name ?? "",
 					email: user?.email ?? "",
 				}}
+				setShowAuthModal={setShowAuthModal}
 				variant="inset"
 			/>
 			<SidebarInset>

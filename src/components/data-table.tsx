@@ -108,6 +108,7 @@ export const schema = z.object({
 	received: z.number(),
 	class: z.string(),
 	dueDate: z.string(),
+	submittedDate: z.number(),
 });
 
 // Create a separate component for the actions dropdown
@@ -446,9 +447,7 @@ function getColumns(
 			cell: ({ row }) => {
 				const dueDate = new Date(row.original.dueDate);
 				const isOverdue =
-					dueDate < new Date() &&
-					row.original.status !== "Done" &&
-					row.original.received === -1;
+					dueDate < new Date() && row.original.submittedDate === -1;
 
 				const [date, setDate] = React.useState<Date>(
 					new Date(row.original.dueDate),
@@ -703,6 +702,34 @@ function getColumns(
 			},
 		},
 		{
+			accessorKey: "submittedDate",
+			header: "Submitted",
+			cell: ({ row }) => {
+				const submittedDate = row.original.submittedDate;
+
+				if (submittedDate === -1) {
+					return (
+						<div className="text-sm text-muted-foreground">
+							Not submitted yet
+						</div>
+					);
+				}
+
+				const date = new Date(submittedDate);
+				return (
+					<div className="text-sm">
+						<div>{date.toLocaleDateString()}</div>
+						<div className="text-xs text-muted-foreground">
+							{date.toLocaleTimeString([], {
+								hour: "2-digit",
+								minute: "2-digit",
+							})}
+						</div>
+					</div>
+				);
+			},
+		},
+		{
 			id: "actions",
 			cell: ({ row }) => <ActionsCell row={row} />,
 		},
@@ -803,8 +830,7 @@ export function DataTable({
 					const currentTime = new Date();
 					return (
 						dueDate.getTime() < currentTime.getTime() &&
-						assignment.status !== "Done" &&
-						assignment.received === -1
+						assignment.submittedDate === -1
 					);
 				});
 			default:
@@ -837,8 +863,7 @@ export function DataTable({
 			const currentTime = new Date();
 			return (
 				dueDate.getTime() < currentTime.getTime() &&
-				assignment.status !== "Done" &&
-				assignment.received === -1
+				assignment.submittedDate === -1
 			);
 		}).length;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { type Icon, IconCirclePlusFilled } from "@tabler/icons-react";
-import { useMutation } from "convex/react";
+import { useConvexAuth, useMutation } from "convex/react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { api } from "@/../convex/_generated/api";
@@ -16,16 +16,26 @@ import {
 
 export function NavMain({
 	items,
+	setShowAuthModal,
 }: {
 	items: {
 		title: string;
 		url: string;
 		icon?: Icon;
 	}[];
+	setShowAuthModal?: (show: boolean) => void;
 }) {
+	const { isAuthenticated } = useConvexAuth();
 	const addAssignment = useMutation(api.assignments.add);
 
 	const handleQuickCreate = async () => {
+		if (!isAuthenticated) {
+			if (setShowAuthModal) {
+				setShowAuthModal(true);
+			}
+			return;
+		}
+
 		const tomorrow = new Date();
 		tomorrow.setDate(tomorrow.getDate() + 1);
 		tomorrow.setHours(23, 59, 0, 0);

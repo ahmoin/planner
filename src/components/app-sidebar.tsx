@@ -40,9 +40,11 @@ const data = {
 
 export function AppSidebar({
 	user,
+	setShowAuthModal,
 	...props
 }: React.ComponentProps<typeof Sidebar> & {
 	user: { name: string; email: string };
+	setShowAuthModal?: (show: boolean) => void;
 }) {
 	return (
 		<Sidebar collapsible="offcanvas" {...props}>
@@ -62,7 +64,7 @@ export function AppSidebar({
 				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>
-				<NavMain items={data.navMain} />
+				<NavMain items={data.navMain} setShowAuthModal={setShowAuthModal} />
 				{/* <NavDocuments items={data.documents} /> */}
 				{/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
 			</SidebarContent>
