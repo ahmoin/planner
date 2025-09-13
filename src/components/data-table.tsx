@@ -102,7 +102,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const schema = z.object({
-	id: z.number(),
+	id: z.union([z.number(), z.string()]),
 	assignment: z.string(),
 	type: z.string(),
 	status: z.string(),
@@ -112,7 +112,7 @@ export const schema = z.object({
 });
 
 // Create a separate component for the drag handle
-function DragHandle({ id }: { id: number }) {
+function DragHandle({ id }: { id: number | string }) {
 	const { attributes, listeners } = useSortable({
 		id,
 	});
@@ -135,7 +135,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 	{
 		id: "drag",
 		header: () => null,
-		cell: ({ row }) => <DragHandle id={row.original.id} />,
+		cell: ({ row }) => <DragHandle id={String(row.original.id)} />,
 	},
 	{
 		id: "select",
@@ -308,7 +308,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 
 function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
 	const { transform, transition, setNodeRef, isDragging } = useSortable({
-		id: row.original.id,
+		id: String(row.original.id),
 	});
 
 	return (
@@ -334,9 +334,11 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
 export function DataTable({
 	data: initialData,
 	setShowAuthModal,
+	setShowAddAssignmentDialog,
 }: {
 	data: z.infer<typeof schema>[];
 	setShowAuthModal: (showAuthModal: boolean) => void;
+	setShowAddAssignmentDialog: (showAddAssignmentDialog: boolean) => void;
 }) {
 	const [data, setData] = React.useState(() => initialData);
 
@@ -359,7 +361,7 @@ export function DataTable({
 	);
 
 	const dataIds = React.useMemo<UniqueIdentifier[]>(
-		() => data?.map(({ id }) => id) || [],
+		() => data?.map(({ id }) => String(id)) || [],
 		[data],
 	);
 
@@ -373,7 +375,7 @@ export function DataTable({
 			columnFilters,
 			pagination,
 		},
-		getRowId: (row) => row.id.toString(),
+		getRowId: (row) => String(row.id),
 		enableRowSelection: true,
 		onRowSelectionChange: setRowSelection,
 		onSortingChange: setSorting,
@@ -394,6 +396,7 @@ export function DataTable({
 			setShowAuthModal(true);
 			return;
 		}
+		setShowAddAssignmentDialog(true);
 	}
 
 	function handleDragEnd(event: DragEndEvent) {

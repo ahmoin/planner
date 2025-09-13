@@ -26,9 +26,19 @@ export const list = query({
 	handler: async (ctx) => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) return [];
-		return await ctx.db
+		const assignments = await ctx.db
 			.query("assignments")
 			.filter((q) => q.eq(q.field("userId"), userId))
 			.collect();
+
+		return assignments.map((assignment) => ({
+			id: assignment._id,
+			assignment: assignment.assignment,
+			type: assignment.type,
+			status: assignment.status,
+			target: assignment.target,
+			received: assignment.received,
+			class: assignment.class,
+		}));
 	},
 });

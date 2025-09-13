@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import * as React from "react";
 import { api } from "@/../convex/_generated/api";
+import { AddAssignmentDialog } from "@/components/add-assignment-dialog";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AuthModal } from "@/components/auth-modal";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
@@ -14,6 +15,8 @@ import data from "@/lib/mock-data.json";
 
 export default function IndexPage() {
 	const [showAuthModal, setShowAuthModal] = React.useState(false);
+	const [showAddAssignmentDialog, setShowAddAssignmentDialog] =
+		React.useState(false);
 	const [authFlow, setAuthFlow] = React.useState<"signIn" | "signUp">("signUp");
 	const user = useQuery(api.users.viewer);
 	const assignments = useQuery(api.assignments.list, user ? {} : "skip");
@@ -44,7 +47,11 @@ export default function IndexPage() {
 							<div className="px-4 lg:px-6">
 								<ChartAreaInteractive />
 							</div>
-							<DataTable data={tableData} setShowAuthModal={setShowAuthModal} />
+							<DataTable
+								data={tableData}
+								setShowAuthModal={setShowAuthModal}
+								setShowAddAssignmentDialog={setShowAddAssignmentDialog}
+							/>
 						</div>
 					</div>
 				</div>
@@ -54,6 +61,10 @@ export default function IndexPage() {
 				setAuthFlow={setAuthFlow}
 				showAuthModal={showAuthModal}
 				setShowAuthModal={setShowAuthModal}
+			/>
+			<AddAssignmentDialog
+				open={showAddAssignmentDialog}
+				onOpenChange={setShowAddAssignmentDialog}
 			/>
 		</SidebarProvider>
 	);
