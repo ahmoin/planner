@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { useConvexAuth, useQuery } from "convex/react";
+import { api } from "@/../convex/_generated/api";
 import {
 	Card,
 	CardAction,
@@ -124,18 +126,21 @@ const chartData = [
 
 const chartConfig = {
 	total: {
-		label: "Total",
+		label: "Received Grade",
 		color: "var(--primary)",
 	},
 	average: {
-		label: "Average",
-		color: "var(--primary)",
+		label: "Target Grade",
+		color: "var(--muted-foreground)",
 	},
 } satisfies ChartConfig;
 
 export function ChartAreaInteractive() {
 	const isMobile = useIsMobile();
 	const [timeRange, setTimeRange] = React.useState("90d");
+	const { isAuthenticated } = useConvexAuth();
+	const assignments = useQuery(api.assignments.list);
+	const semesters = useQuery(api.userPreferences.getSemesters);
 
 	React.useEffect(() => {
 		if (isMobile) {
@@ -143,9 +148,74 @@ export function ChartAreaInteractive() {
 		}
 	}, [isMobile]);
 
-	const filteredData = chartData.filter((item) => {
+	const currentSemester = React.useMemo(() => {
+		if (!semesters || semesters.length === 0) return null;
+
+		const now = new Date();
+		return (
+			semesters.find((semester) => {
+				const semesterStart = new Date(semester.startDate);
+				const semesterEnd = new Date(semester.endDate);
+				return now >= semesterStart && now <= semesterEnd;
+			}) || null
+		);
+	}, [semesters]);
+
+	const processedData = React.useMemo(() => {
+		if (!isAuthenticated || !assignments) {
+			return chartData;
+		}
+
+		const gradedAssignments = assignments.filter(
+			(assignment) => assignment.received !== -1 && assignment.received > 0,
+		);
+
+		if (gradedAssignments.length === 0) {
+			return chartData;
+		}
+
+		const dateGroups: Record<string, { grades: number[]; targets: number[] }> =
+			{};
+
+		gradedAssignments.forEach((assignment) => {
+			const date = new Date(assignment.dueDate).toISOString().split("T")[0];
+			if (!dateGroups[date]) {
+				dateGroups[date] = { grades: [], targets: [] };
+			}
+			dateGroups[date].grades.push(assignment.received);
+			dateGroups[date].targets.push(assignment.target);
+		});
+
+		const realData = Object.entries(dateGroups)
+			.map(([date, data]) => {
+				const avgGrade =
+					data.grades.reduce((sum, grade) => sum + grade, 0) /
+					data.grades.length;
+				const avgTarget =
+					data.targets.reduce((sum, target) => sum + target, 0) /
+					data.targets.length;
+
+				return {
+					date,
+					total: Math.round(avgGrade),
+					average: Math.round(avgTarget),
+				};
+			})
+			.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+		return realData.length > 0 ? realData : chartData;
+	}, [isAuthenticated, assignments]);
+
+	const filteredData = processedData.filter((item) => {
 		const date = new Date(item.date);
-		const referenceDate = new Date("2024-06-30");
+
+		if (timeRange === "semester" && currentSemester) {
+			const semesterStart = new Date(currentSemester.startDate);
+			const semesterEnd = new Date(currentSemester.endDate);
+			return date >= semesterStart && date <= semesterEnd;
+		}
+
+		const referenceDate = new Date();
 		let daysToSubtract = 90;
 		if (timeRange === "30d") {
 			daysToSubtract = 30;
@@ -163,11 +233,31 @@ export function ChartAreaInteractive() {
 				<CardTitle>Assignment Grades</CardTitle>
 				<CardDescription>
 					<span className="hidden @[540px]/card:block">
-						{timeRange === "90d" && "Grades for this marking period so far"}
-						{timeRange === "30d" && "Grades for the last 30 days"}
-						{timeRange === "7d" && "Grades for the last 7 days"}
+						{timeRange === "semester" &&
+							currentSemester &&
+							(isAuthenticated && assignments && assignments.length > 0
+								? `Your grades vs targets for ${currentSemester.name}`
+								: `Grades for ${currentSemester.name}`)}
+						{timeRange === "90d" &&
+							(isAuthenticated && assignments && assignments.length > 0
+								? "Your grades vs targets for the last 90 days"
+								: "Grades for the last 90 days")}
+						{timeRange === "30d" &&
+							(isAuthenticated && assignments && assignments.length > 0
+								? "Your grades vs targets for the last 30 days"
+								: "Grades for the last 30 days")}
+						{timeRange === "7d" &&
+							(isAuthenticated && assignments && assignments.length > 0
+								? "Your grades vs targets for the last 7 days"
+								: "Grades for the last 7 days")}
 					</span>
-					<span className="@[540px]/card:hidden">Marking Period</span>
+					<span className="@[540px]/card:hidden">
+						{timeRange === "semester" && currentSemester
+							? currentSemester.name
+							: isAuthenticated && assignments && assignments.length > 0
+								? "Your Grades"
+								: "Time Period"}
+					</span>
 				</CardDescription>
 				<CardAction>
 					<ToggleGroup
@@ -177,7 +267,12 @@ export function ChartAreaInteractive() {
 						variant="outline"
 						className="hidden *:data-[slot=toggle-group-item]:!px-4 @[767px]/card:flex"
 					>
-						<ToggleGroupItem value="90d">Marking Period</ToggleGroupItem>
+						{currentSemester && (
+							<ToggleGroupItem value="semester">
+								{currentSemester.name}
+							</ToggleGroupItem>
+						)}
+						<ToggleGroupItem value="90d">Last 90 days</ToggleGroupItem>
 						<ToggleGroupItem value="30d">Last 30 days</ToggleGroupItem>
 						<ToggleGroupItem value="7d">Last 7 days</ToggleGroupItem>
 					</ToggleGroup>
@@ -190,8 +285,13 @@ export function ChartAreaInteractive() {
 							<SelectValue placeholder="Marking Period" />
 						</SelectTrigger>
 						<SelectContent className="rounded-xl">
+							{currentSemester && (
+								<SelectItem value="semester" className="rounded-lg">
+									{currentSemester.name}
+								</SelectItem>
+							)}
 							<SelectItem value="90d" className="rounded-lg">
-								Marking Period
+								Last 90 days
 							</SelectItem>
 							<SelectItem value="30d" className="rounded-lg">
 								Last 30 days
@@ -269,14 +369,15 @@ export function ChartAreaInteractive() {
 							type="natural"
 							fill="url(#fillAverage)"
 							stroke="var(--color-average)"
-							stackId="a"
+							strokeDasharray="5 5"
+							fillOpacity={0.1}
 						/>
 						<Area
 							dataKey="total"
 							type="natural"
 							fill="url(#fillTotal)"
 							stroke="var(--color-total)"
-							stackId="a"
+							strokeWidth={2}
 						/>
 					</AreaChart>
 				</ChartContainer>
