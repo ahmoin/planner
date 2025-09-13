@@ -16,7 +16,8 @@ export default function IndexPage() {
 	const [showAuthModal, setShowAuthModal] = React.useState(false);
 	const [authFlow, setAuthFlow] = React.useState<"signIn" | "signUp">("signUp");
 	const user = useQuery(api.users.viewer);
-	const tableData = user ? [] : data;
+	const assignments = useQuery(api.assignments.list, user ? {} : "skip");
+	const tableData = user ? (assignments ?? []) : data;
 
 	return (
 		<SidebarProvider

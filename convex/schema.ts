@@ -16,7 +16,16 @@ const schema = defineSchema({
 	})
 		.index("email", ["email"])
 		.index("phone", ["phone"]),
-	// Your other tables...
+	assignments: defineTable({
+		userId: v.id("users"),
+		assignment: v.string(),
+		type: v.string(),
+		status: v.string(),
+		target: v.number(),
+		received: v.number(),
+		class: v.string(),
+		createdAt: v.number(),
+	}),
 });
 
 export default schema;
