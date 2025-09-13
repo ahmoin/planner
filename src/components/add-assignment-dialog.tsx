@@ -4,10 +4,18 @@ import { useMutation } from "convex/react";
 import * as React from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, Check, ChevronsUpDown } from "lucide-react";
 import { api } from "@/../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from "@/components/ui/command";
 import {
 	Dialog,
 	DialogContent,
@@ -30,6 +38,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const addAssignmentSchema = z.object({
 	assignment: z.string().min(1, "Assignment name is required"),
@@ -45,6 +54,32 @@ interface AddAssignmentDialogProps {
 	onOpenChange: (open: boolean) => void;
 }
 
+const assignmentTypes = [
+	{ value: "essay", label: "Essay" },
+	{ value: "project", label: "Project" },
+	{ value: "exam", label: "Exam" },
+	{ value: "quiz", label: "Quiz" },
+	{ value: "lab", label: "Lab" },
+	{ value: "homework", label: "Homework" },
+	{ value: "presentation", label: "Presentation" },
+	{ value: "research", label: "Research" },
+];
+
+const statusOptions = [
+	{ value: "not-started", label: "Not Started" },
+	{ value: "in-progress", label: "In Progress" },
+	{ value: "done", label: "Done" },
+];
+
+const classOptions = [
+	{ value: "english", label: "English" },
+	{ value: "math", label: "Math" },
+	{ value: "science", label: "Science" },
+	{ value: "language", label: "Language" },
+	{ value: "elective", label: "Elective" },
+	{ value: "history", label: "History" },
+];
+
 export function AddAssignmentDialog({
 	open,
 	onOpenChange,
@@ -53,6 +88,12 @@ export function AddAssignmentDialog({
 	const [date, setDate] = React.useState<Date>();
 	const [time, setTime] = React.useState("23:59");
 	const [datePickerOpen, setDatePickerOpen] = React.useState(false);
+	const [typeOpen, setTypeOpen] = React.useState(false);
+	const [typeValue, setTypeValue] = React.useState("");
+	const [statusOpen, setStatusOpen] = React.useState(false);
+	const [statusValue, setStatusValue] = React.useState("In Progress");
+	const [classOpen, setClassOpen] = React.useState(false);
+	const [classValue, setClassValue] = React.useState("");
 	const addAssignment = useMutation(api.assignments.add);
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -72,10 +113,10 @@ export function AddAssignmentDialog({
 
 		const data = {
 			assignment: formData.get("assignment") as string,
-			type: formData.get("type") as string,
-			status: formData.get("status") as string,
+			type: typeValue,
+			status: statusValue,
 			target: Number(formData.get("target")),
-			class: formData.get("class") as string,
+			class: classValue,
 			dueDate: dueDate,
 		};
 
@@ -91,6 +132,9 @@ export function AddAssignmentDialog({
 			(e.target as HTMLFormElement).reset();
 			setDate(undefined);
 			setTime("23:59");
+			setTypeValue("");
+			setStatusValue("In Progress");
+			setClassValue("");
 		} catch (error) {
 			if (error instanceof z.ZodError) {
 				toast.error(error.issues[0]?.message || "Please check your input");
@@ -125,26 +169,127 @@ export function AddAssignmentDialog({
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
 							<Label htmlFor="type">Type</Label>
-							<Input
-								id="type"
-								name="type"
-								placeholder="e.g. Essay, Project, Exam"
-								required
-							/>
+							<Popover open={typeOpen} onOpenChange={setTypeOpen}>
+								<PopoverTrigger asChild>
+									<Button
+										variant="outline"
+										role="combobox"
+										aria-expanded={typeOpen}
+										className="w-full justify-between"
+									>
+										{typeValue
+											? assignmentTypes.find((type) => type.value === typeValue)
+													?.label || typeValue
+											: "Select or enter type..."}
+										<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent className="w-full p-0">
+									<Command>
+										<CommandInput
+											placeholder="Search or enter custom type..."
+											className="h-9"
+											value={typeValue}
+											onValueChange={setTypeValue}
+											onKeyDown={(e) => {
+												if (e.key === "Enter" && typeValue.trim()) {
+													e.preventDefault();
+													setTypeOpen(false);
+												}
+											}}
+										/>
+										<CommandList>
+											<CommandEmpty>
+												<div className="px-2 text-center text-sm">
+													Press Enter to use "{typeValue}" as custom type
+												</div>
+											</CommandEmpty>
+											<CommandGroup>
+												{assignmentTypes.map((type) => (
+													<CommandItem
+														key={type.value}
+														value={type.value}
+														onSelect={(currentValue) => {
+															setTypeValue(
+																currentValue === typeValue ? "" : type.label,
+															);
+															setTypeOpen(false);
+														}}
+													>
+														{type.label}
+														<Check
+															className={cn(
+																"ml-auto h-4 w-4",
+																typeValue === type.label
+																	? "opacity-100"
+																	: "opacity-0",
+															)}
+														/>
+													</CommandItem>
+												))}
+											</CommandGroup>
+										</CommandList>
+									</Command>
+								</PopoverContent>
+							</Popover>
 						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="status">Status</Label>
-							<Select name="status" required>
-								<SelectTrigger>
-									<SelectValue placeholder="Select status" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="Not Started">Not Started</SelectItem>
-									<SelectItem value="In Progress">In Progress</SelectItem>
-									<SelectItem value="Done">Done</SelectItem>
-								</SelectContent>
-							</Select>
+							<Popover open={statusOpen} onOpenChange={setStatusOpen}>
+								<PopoverTrigger asChild>
+									<Button
+										variant="outline"
+										role="combobox"
+										aria-expanded={statusOpen}
+										className="w-full justify-between"
+									>
+										{statusValue
+											? statusOptions.find(
+													(status) => status.value === statusValue,
+												)?.label || statusValue
+											: "Select status..."}
+										<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent className="w-full p-0">
+									<Command>
+										<CommandInput
+											placeholder="Search status..."
+											className="h-9"
+										/>
+										<CommandList>
+											<CommandEmpty>No status found.</CommandEmpty>
+											<CommandGroup>
+												{statusOptions.map((status) => (
+													<CommandItem
+														key={status.value}
+														value={status.value}
+														onSelect={(currentValue) => {
+															setStatusValue(
+																currentValue === statusValue
+																	? ""
+																	: status.label,
+															);
+															setStatusOpen(false);
+														}}
+													>
+														{status.label}
+														<Check
+															className={cn(
+																"ml-auto h-4 w-4",
+																statusValue === status.label
+																	? "opacity-100"
+																	: "opacity-0",
+															)}
+														/>
+													</CommandItem>
+												))}
+											</CommandGroup>
+										</CommandList>
+									</Command>
+								</PopoverContent>
+							</Popover>
 						</div>
 					</div>
 
@@ -206,18 +351,69 @@ export function AddAssignmentDialog({
 
 					<div className="space-y-2">
 						<Label htmlFor="class">Class</Label>
-						<Select name="class" required>
-							<SelectTrigger>
-								<SelectValue placeholder="Select class" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-								<SelectItem value="Jamik Tashpulatov">
-									Jamik Tashpulatov
-								</SelectItem>
-								<SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
-							</SelectContent>
-						</Select>
+						<Popover open={classOpen} onOpenChange={setClassOpen}>
+							<PopoverTrigger asChild>
+								<Button
+									variant="outline"
+									role="combobox"
+									aria-expanded={classOpen}
+									className="w-full justify-between"
+								>
+									{classValue
+										? classOptions.find((cls) => cls.value === classValue)
+												?.label || classValue
+										: "Select or enter class..."}
+									<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className="w-full p-0">
+								<Command>
+									<CommandInput
+										placeholder="Search or enter custom class..."
+										className="h-9"
+										value={classValue}
+										onValueChange={setClassValue}
+										onKeyDown={(e) => {
+											if (e.key === "Enter" && classValue.trim()) {
+												e.preventDefault();
+												setClassOpen(false);
+											}
+										}}
+									/>
+									<CommandList>
+										<CommandEmpty>
+											<div className="px-2 text-center text-sm">
+												Press Enter to use "{classValue}" as custom class
+											</div>
+										</CommandEmpty>
+										<CommandGroup>
+											{classOptions.map((cls) => (
+												<CommandItem
+													key={cls.value}
+													value={cls.value}
+													onSelect={(currentValue) => {
+														setClassValue(
+															currentValue === classValue ? "" : cls.label,
+														);
+														setClassOpen(false);
+													}}
+												>
+													{cls.label}
+													<Check
+														className={cn(
+															"ml-auto h-4 w-4",
+															classValue === cls.label
+																? "opacity-100"
+																: "opacity-0",
+														)}
+													/>
+												</CommandItem>
+											))}
+										</CommandGroup>
+									</CommandList>
+								</Command>
+							</PopoverContent>
+						</Popover>
 					</div>
 
 					<DialogFooter>
