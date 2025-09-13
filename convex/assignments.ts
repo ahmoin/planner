@@ -42,3 +42,20 @@ export const list = query({
 		}));
 	},
 });
+
+export const remove = mutation({
+	args: {
+		id: v.id("assignments"),
+	},
+	handler: async (ctx, args) => {
+		const userId = await getAuthUserId(ctx);
+		if (!userId) throw new Error("Not authenticated");
+
+		const assignment = await ctx.db.get(args.id);
+		if (!assignment || assignment.userId !== userId) {
+			throw new Error("Assignment not found or unauthorized");
+		}
+
+		await ctx.db.delete(args.id);
+	},
+});

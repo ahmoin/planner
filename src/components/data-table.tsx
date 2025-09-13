@@ -31,7 +31,6 @@ import {
 	IconLayoutColumns,
 	IconLoader,
 	IconPlus,
-	IconTrendingUp,
 } from "@tabler/icons-react";
 import {
 	type ColumnDef,
@@ -48,24 +47,18 @@ import {
 	useReactTable,
 	type VisibilityState,
 } from "@tanstack/react-table";
-import { useConvexAuth } from "convex/react";
+import { useConvexAuth, useMutation } from "convex/react";
 import * as React from "react";
+import { api } from "@/../convex/_generated/api";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-	type ChartConfig,
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-} from "@/components/ui/chart";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Drawer,
 	DrawerClose,
 	DrawerContent,
-	DrawerDescription,
 	DrawerFooter,
 	DrawerHeader,
 	DrawerTitle,
@@ -88,7 +81,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import {
 	Table,
 	TableBody,
@@ -109,6 +101,55 @@ export const schema = z.object({
 	received: z.number(),
 	class: z.string(),
 });
+
+// Create a separate component for the actions dropdown
+function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
+	const deleteAssignment = useMutation(api.assignments.remove);
+	const [isDeleting, setIsDeleting] = React.useState(false);
+
+	const handleDelete = async () => {
+		if (!confirm("Are you sure you want to delete this assignment?")) {
+			return;
+		}
+
+		setIsDeleting(true);
+		try {
+			await deleteAssignment({ id: row.original.id as any });
+			toast.success("Assignment deleted successfully");
+		} catch (error) {
+			toast.error("Failed to delete assignment");
+		} finally {
+			setIsDeleting(false);
+		}
+	};
+
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button
+					variant="ghost"
+					className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+					size="icon"
+					disabled={isDeleting}
+				>
+					<IconDotsVertical />
+					<span className="sr-only">Open menu</span>
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end" className="w-32">
+				<DropdownMenuItem>Edit</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem
+					variant="destructive"
+					onClick={handleDelete}
+					disabled={isDeleting}
+				>
+					{isDeleting ? "Deleting..." : "Delete"}
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+}
 
 // Create a separate component for the drag handle
 function DragHandle({ id }: { id: number | string }) {
@@ -281,27 +322,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 	},
 	{
 		id: "actions",
-		cell: () => (
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button
-						variant="ghost"
-						className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-						size="icon"
-					>
-						<IconDotsVertical />
-						<span className="sr-only">Open menu</span>
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="w-32">
-					<DropdownMenuItem>Edit</DropdownMenuItem>
-					{/* <DropdownMenuItem>Make a copy</DropdownMenuItem>
-					<DropdownMenuItem>Favorite</DropdownMenuItem> */}
-					<DropdownMenuSeparator />
-					<DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-		),
+		cell: ({ row }) => <ActionsCell row={row} />,
 	},
 ];
 
@@ -642,26 +663,6 @@ export function DataTable({
 		</Tabs>
 	);
 }
-
-const chartData = [
-	{ month: "January", desktop: 186, mobile: 80 },
-	{ month: "February", desktop: 305, mobile: 200 },
-	{ month: "March", desktop: 237, mobile: 120 },
-	{ month: "April", desktop: 73, mobile: 190 },
-	{ month: "May", desktop: 209, mobile: 130 },
-	{ month: "June", desktop: 214, mobile: 140 },
-];
-
-const chartConfig = {
-	desktop: {
-		label: "Desktop",
-		color: "var(--primary)",
-	},
-	mobile: {
-		label: "Mobile",
-		color: "var(--primary)",
-	},
-} satisfies ChartConfig;
 
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 	const isMobile = useIsMobile();
