@@ -50,7 +50,6 @@ import {
 } from "@tanstack/react-table";
 import { useConvexAuth } from "convex/react";
 import * as React from "react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
@@ -296,8 +295,8 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end" className="w-32">
 					<DropdownMenuItem>Edit</DropdownMenuItem>
-					<DropdownMenuItem>Make a copy</DropdownMenuItem>
-					<DropdownMenuItem>Favorite</DropdownMenuItem>
+					{/* <DropdownMenuItem>Make a copy</DropdownMenuItem>
+					<DropdownMenuItem>Favorite</DropdownMenuItem> */}
 					<DropdownMenuSeparator />
 					<DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
 				</DropdownMenuContent>
@@ -677,12 +676,12 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 			<DrawerContent>
 				<DrawerHeader className="gap-1">
 					<DrawerTitle>{item.assignment}</DrawerTitle>
-					<DrawerDescription>
+					{/* <DrawerDescription>
 						Showing total visitors for the last 6 months
-					</DrawerDescription>
+					</DrawerDescription> */}
 				</DrawerHeader>
 				<div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-					{!isMobile && (
+					{/* {!isMobile && (
 						<>
 							<ChartContainer config={chartConfig}>
 								<AreaChart
@@ -738,7 +737,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 							</div>
 							<Separator />
 						</>
-					)}
+					)} */}
 					<form className="flex flex-col gap-4">
 						<div className="flex flex-col gap-3">
 							<Label htmlFor="assignment">Assignment</Label>
