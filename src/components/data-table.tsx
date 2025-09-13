@@ -133,8 +133,6 @@ function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-32">
-				<DropdownMenuItem>Edit</DropdownMenuItem>
-				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					variant="destructive"
 					onClick={handleDelete}

@@ -40,7 +40,7 @@ export const list = query({
 			target: assignment.target,
 			received: assignment.received,
 			class: assignment.class,
-			dueDate: assignment.dueDate,
+			dueDate: assignment.dueDate || new Date().toISOString(),
 		}));
 	},
 });
