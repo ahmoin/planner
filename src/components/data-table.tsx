@@ -34,19 +34,6 @@ import {
 	IconProgress,
 	IconTimeDuration0,
 } from "@tabler/icons-react";
-import { Calendar } from "@/components/ui/calendar";
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
 import {
 	type ColumnDef,
 	type ColumnFiltersState,
@@ -68,11 +55,17 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { api } from "@/../convex/_generated/api";
 import type { Id } from "@/../convex/_generated/dataModel";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
-
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -82,6 +75,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 import {
 	Select,
 	SelectContent,
@@ -98,6 +96,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 export const schema = z.object({
 	id: z.union([z.number(), z.string(), z.custom<Id<"assignments">>()]),
@@ -510,7 +509,7 @@ function getColumns(
 							)}
 							onClick={() => setDialogOpen(true)}
 						>
-							<div>{dueDate.toLocaleDateString()}</div>
+							<div>{dueDate.toLocaleDateString("en-US")}</div>
 							<div className="text-xs text-muted-foreground">
 								{dueDate.toLocaleTimeString([], {
 									hour: "2-digit",
@@ -537,7 +536,9 @@ function getColumns(
 														variant="outline"
 														className="w-full justify-between font-normal"
 													>
-														{date ? date.toLocaleDateString() : "Select date"}
+														{date
+															? date.toLocaleDateString("en-US")
+															: "Select date"}
 														<IconChevronDown className="h-4 w-4" />
 													</Button>
 												</PopoverTrigger>
@@ -718,7 +719,7 @@ function getColumns(
 				const date = new Date(submittedDate);
 				return (
 					<div className="text-sm">
-						<div>{date.toLocaleDateString()}</div>
+						<div>{date.toLocaleDateString("en-US")}</div>
 						<div className="text-xs text-muted-foreground">
 							{date.toLocaleTimeString([], {
 								hour: "2-digit",

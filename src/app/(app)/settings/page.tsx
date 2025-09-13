@@ -1,13 +1,14 @@
 "use client";
 
+import { IconEdit, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useMutation, useQuery } from "convex/react";
 import * as React from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { IconPlus, IconTrash, IconEdit } from "@tabler/icons-react";
 import { api } from "@/../convex/_generated/api";
 import type { Id } from "@/../convex/_generated/dataModel";
 import { AppSidebar } from "@/components/app-sidebar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -27,7 +28,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 const userSchema = z.object({
@@ -426,8 +426,13 @@ export default function SettingsPage() {
 											<div>
 												<div className="font-medium">{semester.name}</div>
 												<div className="text-sm text-muted-foreground">
-													{new Date(semester.startDate).toLocaleDateString()} -{" "}
-													{new Date(semester.endDate).toLocaleDateString()}
+													{new Date(semester.startDate).toLocaleDateString(
+														"en-US",
+													)}{" "}
+													-{" "}
+													{new Date(semester.endDate).toLocaleDateString(
+														"en-US",
+													)}
 												</div>
 											</div>
 											<div className="flex gap-2">

@@ -1,10 +1,10 @@
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
+import { Check, ChevronDownIcon, ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { ChevronDownIcon, Check, ChevronsUpDown } from "lucide-react";
 import { api } from "@/../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -313,7 +313,7 @@ export function AddAssignmentDialog({
 										id="date-picker"
 										className="w-full justify-between font-normal"
 									>
-										{date ? date.toLocaleDateString() : "Select date"}
+										{date ? date.toLocaleDateString("en-US") : "Select date"}
 										<ChevronDownIcon className="h-4 w-4" />
 									</Button>
 								</PopoverTrigger>
