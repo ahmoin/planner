@@ -15,7 +15,6 @@ export const add = mutation({
 		const userId = await getAuthUserId(ctx);
 		if (!userId) throw new Error("Not authenticated");
 
-		// Check if type exists in user preferences, if not add it
 		if (args.type.trim()) {
 			const existingType = await ctx.db
 				.query("userTypes")
@@ -32,7 +31,6 @@ export const add = mutation({
 			}
 		}
 
-		// Check if class exists in user preferences, if not add it
 		if (args.class.trim()) {
 			const existingClass = await ctx.db
 				.query("userClasses")
@@ -101,7 +99,6 @@ export const update = mutation({
 		}
 
 		const { id, ...updateData } = args;
-		// Only include fields that are defined
 		const fieldsToUpdate = Object.fromEntries(
 			Object.entries(updateData).filter(([_, value]) => value !== undefined),
 		);

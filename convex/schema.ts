@@ -12,6 +12,17 @@ const schema = defineSchema({
 		phone: v.optional(v.string()),
 		phoneVerificationTime: v.optional(v.number()),
 		isAnonymous: v.optional(v.boolean()),
+		semesters: v.optional(
+			v.array(
+				v.object({
+					id: v.string(),
+					name: v.string(),
+					startDate: v.string(),
+					endDate: v.string(),
+					createdAt: v.number(),
+				}),
+			),
+		),
 		// other "users" fields...
 	})
 		.index("email", ["email"])
