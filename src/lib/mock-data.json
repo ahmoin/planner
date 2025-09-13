@@ -2,20 +2,22 @@
 	{
 		"id": 1,
 		"assignment": "Intro Essay",
-		"type": "Homework",
+		"type": "Essay",
 		"status": "In Process",
 		"target": 85,
-		"received": 78,
-		"class": "English 5"
+		"received": -1,
+		"class": "English 5",
+		"dueDate": "2025-01-15T23:59:00.000Z"
 	},
 	{
 		"id": 2,
 		"assignment": "Chapter 1 Quiz",
-		"type": "Homework",
+		"type": "Quiz",
 		"status": "Done",
 		"target": 92,
 		"received": 90,
-		"class": "English 5"
+		"class": "English 5",
+		"dueDate": "2024-12-20T11:30:00.000Z"
 	},
 	{
 		"id": 3,
@@ -24,7 +26,8 @@
 		"status": "Done",
 		"target": 88,
 		"received": 91,
-		"class": "English 5"
+		"class": "English 5",
+		"dueDate": "2024-12-15T17:00:00.000Z"
 	},
 	{
 		"id": 4,
@@ -32,8 +35,9 @@
 		"type": "Worksheet",
 		"status": "In Process",
 		"target": 86,
-		"received": 79,
-		"class": "Spanish 5"
+		"received": -1,
+		"class": "Spanish 5",
+		"dueDate": "2025-01-20T14:30:00.000Z"
 	},
 	{
 		"id": 5,
@@ -41,8 +45,9 @@
 		"type": "Project",
 		"status": "In Process",
 		"target": 90,
-		"received": 82,
-		"class": "Spanish 5"
+		"received": -1,
+		"class": "Spanish 5",
+		"dueDate": "2025-01-25T16:00:00.000Z"
 	},
 	{
 		"id": 6,
@@ -51,7 +56,8 @@
 		"status": "Done",
 		"target": 87,
 		"received": 89,
-		"class": "Spanish 5"
+		"class": "Spanish 5",
+		"dueDate": "2024-12-10T12:00:00.000Z"
 	},
 	{
 		"id": 7,
@@ -60,16 +66,18 @@
 		"status": "Done",
 		"target": 93,
 		"received": 91,
-		"class": "AP Physics C: Mechanics"
+		"class": "AP Physics C: Mechanics",
+		"dueDate": "2024-11-30T15:30:00.000Z"
 	},
 	{
 		"id": 8,
 		"assignment": "Projectile Quiz",
-		"type": "Homework",
+		"type": "Quiz",
 		"status": "Done",
 		"target": 88,
 		"received": 84,
-		"class": "AP Physics C: Mechanics"
+		"class": "AP Physics C: Mechanics",
+		"dueDate": "2024-12-05T10:00:00.000Z"
 	},
 	{
 		"id": 9,
@@ -78,7 +86,8 @@
 		"status": "Done",
 		"target": 92,
 		"received": 95,
-		"class": "AP Physics C: Mechanics"
+		"class": "AP Physics C: Mechanics",
+		"dueDate": "2024-12-12T13:45:00.000Z"
 	},
 	{
 		"id": 10,
@@ -87,7 +96,8 @@
 		"status": "Done",
 		"target": 90,
 		"received": 93,
-		"class": "Entrepreneurship"
+		"class": "Entrepreneurship",
+		"dueDate": "2024-11-25T18:00:00.000Z"
 	},
 	{
 		"id": 11,
@@ -96,7 +106,8 @@
 		"status": "Done",
 		"target": 87,
 		"received": 85,
-		"class": "Entrepreneurship"
+		"class": "Entrepreneurship",
+		"dueDate": "2024-12-01T20:30:00.000Z"
 	},
 	{
 		"id": 12,
@@ -104,8 +115,9 @@
 		"type": "Project",
 		"status": "In Process",
 		"target": 89,
-		"received": 80,
-		"class": "Entrepreneurship"
+		"received": -1,
+		"class": "Entrepreneurship",
+		"dueDate": "2025-01-10T09:00:00.000Z"
 	},
 	{
 		"id": 13,
@@ -114,25 +126,28 @@
 		"status": "Done",
 		"target": 90,
 		"received": 92,
-		"class": "English 5"
+		"class": "English 5",
+		"dueDate": "2024-11-20T23:59:00.000Z"
 	},
 	{
 		"id": 14,
 		"assignment": "Past Exam",
-		"type": "Homework",
+		"type": "Exam",
 		"status": "Done",
 		"target": 88,
 		"received": 86,
-		"class": "Calculus"
+		"class": "Calculus",
+		"dueDate": "2024-12-08T14:00:00.000Z"
 	},
 	{
 		"id": 15,
 		"assignment": "Derivative Quiz",
-		"type": "Homework",
+		"type": "Quiz",
 		"status": "In Process",
 		"target": 91,
-		"received": 83,
-		"class": "Calculus"
+		"received": -1,
+		"class": "Calculus",
+		"dueDate": "2025-01-05T11:15:00.000Z"
 	},
 	{
 		"id": 16,
@@ -141,6 +156,7 @@
 		"status": "Done",
 		"target": 92,
 		"received": 94,
-		"class": "Calculus"
+		"class": "Calculus",
+		"dueDate": "2024-12-18T16:30:00.000Z"
 	}
 ]

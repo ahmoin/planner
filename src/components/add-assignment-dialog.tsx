@@ -4,8 +4,10 @@ import { useMutation } from "convex/react";
 import * as React from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { ChevronDownIcon } from "lucide-react";
 import { api } from "@/../convex/_generated/api";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
 	Dialog,
 	DialogContent,
@@ -16,6 +18,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 import {
 	Select,
 	SelectContent,
@@ -29,8 +36,8 @@ const addAssignmentSchema = z.object({
 	type: z.string().min(1, "Type is required"),
 	status: z.string().min(1, "Status is required"),
 	target: z.number().min(0).max(100),
-	received: z.number().min(0).max(100),
 	class: z.string().min(1, "Class is required"),
+	dueDate: z.string().min(1, "Due date and time are required"),
 });
 
 interface AddAssignmentDialogProps {
@@ -43,6 +50,9 @@ export function AddAssignmentDialog({
 	onOpenChange,
 }: AddAssignmentDialogProps) {
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
+	const [date, setDate] = React.useState<Date>();
+	const [time, setTime] = React.useState("23:59");
+	const [datePickerOpen, setDatePickerOpen] = React.useState(false);
 	const addAssignment = useMutation(api.assignments.add);
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -50,13 +60,23 @@ export function AddAssignmentDialog({
 		setIsSubmitting(true);
 
 		const formData = new FormData(e.currentTarget);
+
+		// Combine date and time into ISO string
+		let dueDate = "";
+		if (date && time) {
+			const [hours, minutes] = time.split(":");
+			const combinedDate = new Date(date);
+			combinedDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+			dueDate = combinedDate.toISOString();
+		}
+
 		const data = {
 			assignment: formData.get("assignment") as string,
 			type: formData.get("type") as string,
 			status: formData.get("status") as string,
 			target: Number(formData.get("target")),
-			received: Number(formData.get("received")),
 			class: formData.get("class") as string,
+			dueDate: dueDate,
 		};
 
 		try {
@@ -67,7 +87,10 @@ export function AddAssignmentDialog({
 			toast.success("Assignment added successfully!");
 			onOpenChange(false);
 
+			// Reset form and state
 			(e.target as HTMLFormElement).reset();
+			setDate(undefined);
+			setTime("23:59");
 		} catch (error) {
 			if (error instanceof z.ZodError) {
 				toast.error(error.issues[0]?.message || "Please check your input");
@@ -102,29 +125,12 @@ export function AddAssignmentDialog({
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
 							<Label htmlFor="type">Type</Label>
-							<Select name="type" required>
-								<SelectTrigger>
-									<SelectValue placeholder="Select type" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="Table of Contents">
-										Table of Contents
-									</SelectItem>
-									<SelectItem value="Executive Summary">
-										Executive Summary
-									</SelectItem>
-									<SelectItem value="Technical Approach">
-										Technical Approach
-									</SelectItem>
-									<SelectItem value="Design">Design</SelectItem>
-									<SelectItem value="Capabilities">Capabilities</SelectItem>
-									<SelectItem value="Focus Documents">
-										Focus Documents
-									</SelectItem>
-									<SelectItem value="Narrative">Narrative</SelectItem>
-									<SelectItem value="Assignment">Assignment</SelectItem>
-								</SelectContent>
-							</Select>
+							<Input
+								id="type"
+								name="type"
+								placeholder="e.g. Essay, Project, Exam"
+								required
+							/>
 						</div>
 
 						<div className="space-y-2">
@@ -142,30 +148,58 @@ export function AddAssignmentDialog({
 						</div>
 					</div>
 
+					<div className="space-y-2">
+						<Label htmlFor="target">Target Grade</Label>
+						<Input
+							id="target"
+							name="target"
+							type="number"
+							min="0"
+							max="100"
+							defaultValue="85"
+							required
+						/>
+					</div>
+
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="target">Target Grade</Label>
-							<Input
-								id="target"
-								name="target"
-								type="number"
-								min="0"
-								max="100"
-								defaultValue="85"
-								required
-							/>
+							<Label htmlFor="date-picker">Due Date</Label>
+							<Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+								<PopoverTrigger asChild>
+									<Button
+										variant="outline"
+										id="date-picker"
+										className="w-full justify-between font-normal"
+									>
+										{date ? date.toLocaleDateString() : "Select date"}
+										<ChevronDownIcon className="h-4 w-4" />
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent
+									className="w-auto overflow-hidden p-0"
+									align="start"
+								>
+									<Calendar
+										mode="single"
+										selected={date}
+										captionLayout="dropdown"
+										onSelect={(selectedDate) => {
+											setDate(selectedDate);
+											setDatePickerOpen(false);
+										}}
+									/>
+								</PopoverContent>
+							</Popover>
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="received">Received Grade</Label>
+							<Label htmlFor="time-picker">Due Time</Label>
 							<Input
-								id="received"
-								name="received"
-								type="number"
-								min="0"
-								max="100"
-								defaultValue="0"
-								required
+								type="time"
+								id="time-picker"
+								value={time}
+								onChange={(e) => setTime(e.target.value)}
+								className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
 							/>
 						</div>
 					</div>

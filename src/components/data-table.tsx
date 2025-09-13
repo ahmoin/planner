@@ -49,9 +49,10 @@ import {
 } from "@tanstack/react-table";
 import { useConvexAuth, useMutation } from "convex/react";
 import * as React from "react";
-import { api } from "@/../convex/_generated/api";
 import { toast } from "sonner";
 import { z } from "zod";
+import { api } from "@/../convex/_generated/api";
+import type { Id } from "@/../convex/_generated/dataModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -93,13 +94,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const schema = z.object({
-	id: z.union([z.number(), z.string()]),
+	id: z.union([z.number(), z.string(), z.custom<Id<"assignments">>()]),
 	assignment: z.string(),
 	type: z.string(),
 	status: z.string(),
 	target: z.number(),
 	received: z.number(),
 	class: z.string(),
+	dueDate: z.string(),
 });
 
 // Create a separate component for the actions dropdown
@@ -114,10 +116,11 @@ function ActionsCell({ row }: { row: Row<z.infer<typeof schema>> }) {
 
 		setIsDeleting(true);
 		try {
-			await deleteAssignment({ id: row.original.id as any });
+			await deleteAssignment({ id: row.original.id as Id<"assignments"> });
 			toast.success("Assignment deleted successfully");
 		} catch (error) {
 			toast.error("Failed to delete assignment");
+			console.warn(error);
 		} finally {
 			setIsDeleting(false);
 		}
@@ -171,160 +174,279 @@ function DragHandle({ id }: { id: number | string }) {
 	);
 }
 
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
-	{
-		id: "drag",
-		header: () => null,
-		cell: ({ row }) => <DragHandle id={String(row.original.id)} />,
-	},
-	{
-		id: "select",
-		header: ({ table }) => (
-			<div className="flex items-center justify-center">
-				<Checkbox
-					checked={
-						table.getIsAllPageRowsSelected() ||
-						(table.getIsSomePageRowsSelected() && "indeterminate")
-					}
-					onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-					aria-label="Select all"
-				/>
-			</div>
-		),
-		cell: ({ row }) => (
-			<div className="flex items-center justify-center">
-				<Checkbox
-					checked={row.getIsSelected()}
-					onCheckedChange={(value) => row.toggleSelected(!!value)}
-					aria-label="Select row"
-				/>
-			</div>
-		),
-		enableSorting: false,
-		enableHiding: false,
-	},
-	{
-		accessorKey: "assignment",
-		header: "Assignment",
-		cell: ({ row }) => {
-			return <TableCellViewer item={row.original} />;
+function getColumns(
+	updateAssignment: ReturnType<typeof useMutation>,
+): ColumnDef<z.infer<typeof schema>>[] {
+	return [
+		{
+			id: "drag",
+			header: () => null,
+			cell: ({ row }) => <DragHandle id={String(row.original.id)} />,
 		},
-		enableHiding: false,
-	},
-	{
-		accessorKey: "type",
-		header: "Section Type",
-		cell: ({ row }) => (
-			<div className="w-32">
+		{
+			id: "select",
+			header: ({ table }) => (
+				<div className="flex items-center justify-center">
+					<Checkbox
+						checked={
+							table.getIsAllPageRowsSelected() ||
+							(table.getIsSomePageRowsSelected() && "indeterminate")
+						}
+						onCheckedChange={(value) =>
+							table.toggleAllPageRowsSelected(!!value)
+						}
+						aria-label="Select all"
+					/>
+				</div>
+			),
+			cell: ({ row }) => (
+				<div className="flex items-center justify-center">
+					<Checkbox
+						checked={row.getIsSelected()}
+						onCheckedChange={(value) => row.toggleSelected(!!value)}
+						aria-label="Select row"
+					/>
+				</div>
+			),
+			enableSorting: false,
+			enableHiding: false,
+		},
+		{
+			accessorKey: "assignment",
+			header: "Assignment",
+			cell: ({ row }) => <TableCellViewer item={row.original} />,
+			enableHiding: false,
+		},
+		{
+			accessorKey: "type",
+			header: "Section Type",
+			cell: ({ row }) => (
+				<div className="w-32">
+					<Badge variant="outline" className="text-muted-foreground px-1.5">
+						{row.original.type}
+					</Badge>
+				</div>
+			),
+		},
+		{
+			accessorKey: "status",
+			header: "Status",
+			cell: ({ row }) => (
 				<Badge variant="outline" className="text-muted-foreground px-1.5">
-					{row.original.type}
+					{row.original.status === "Done" ? (
+						<IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+					) : (
+						<IconLoader />
+					)}
+					{row.original.status}
 				</Badge>
-			</div>
-		),
-	},
-	{
-		accessorKey: "status",
-		header: "Status",
-		cell: ({ row }) => (
-			<Badge variant="outline" className="text-muted-foreground px-1.5">
-				{row.original.status === "Done" ? (
-					<IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-				) : (
-					<IconLoader />
-				)}
-				{row.original.status}
-			</Badge>
-		),
-	},
-	{
-		accessorKey: "target",
-		header: () => <div className="w-full text-right">Target Grade</div>,
-		cell: ({ row }) => (
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-						loading: `Saving ${row.original.assignment}`,
-						success: "Done",
-						error: "Error",
-					});
-				}}
-			>
-				<Label htmlFor={`${row.original.id}-target`} className="sr-only">
-					Target Grade
-				</Label>
-				<Input
-					className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
-					defaultValue={row.original.target}
-					id={`${row.original.id}-target`}
-				/>
-			</form>
-		),
-	},
-	{
-		accessorKey: "received",
-		header: () => <div className="w-full text-right">Received Grade</div>,
-		cell: ({ row }) => (
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-						loading: `Saving ${row.original.assignment}`,
-						success: "Done",
-						error: "Error",
-					});
-				}}
-			>
-				<Label htmlFor={`${row.original.id}-received`} className="sr-only">
-					Received Grade
-				</Label>
-				<Input
-					className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
-					defaultValue={row.original.received}
-					id={`${row.original.id}-received`}
-				/>
-			</form>
-		),
-	},
-	{
-		accessorKey: "class",
-		header: "Class",
-		cell: ({ row }) => {
-			const isAssigned = row.original.class !== "Assign class";
-
-			if (isAssigned) {
-				return row.original.class;
-			}
-
-			return (
-				<>
-					<Label htmlFor={`${row.original.id}-class`} className="sr-only">
-						Class
-					</Label>
-					<Select>
-						<SelectTrigger
-							className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
-							size="sm"
-							id={`${row.original.id}-class`}
-						>
-							<SelectValue placeholder="Assign class" />
-						</SelectTrigger>
-						<SelectContent align="end">
-							<SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-							<SelectItem value="Jamik Tashpulatov">
-								Jamik Tashpulatov
-							</SelectItem>
-						</SelectContent>
-					</Select>
-				</>
-			);
+			),
 		},
-	},
-	{
-		id: "actions",
-		cell: ({ row }) => <ActionsCell row={row} />,
-	},
-];
+		{
+			accessorKey: "target",
+			header: "Target Grade",
+			cell: ({ row }) => {
+				const [value, setValue] = React.useState<number | "">(
+					row.original.target,
+				);
+				const [isUpdating, setIsUpdating] = React.useState(false);
+
+				const handleSave = async () => {
+					if (value === "" || Number(value) === row.original.target) return;
+
+					setIsUpdating(true);
+					try {
+						await updateAssignment({
+							id: row.original.id as Id<"assignments">,
+							target: Number(value),
+						});
+					} catch (error) {
+						console.error("Failed to update target grade:", error);
+						setValue(row.original.target);
+					} finally {
+						setIsUpdating(false);
+					}
+				};
+
+				return (
+					<div className="relative">
+						<Label htmlFor={`${row.original.id}-target`} className="sr-only">
+							Target Grade
+						</Label>
+						<Input
+							className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+							value={value}
+							onChange={(e) =>
+								setValue(e.target.value === "" ? "" : Number(e.target.value))
+							}
+							onBlur={handleSave}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									e.currentTarget.blur();
+								}
+							}}
+							id={`${row.original.id}-target`}
+							type="number"
+							disabled={isUpdating}
+						/>
+						{isUpdating && (
+							<div className="absolute inset-0 flex items-center justify-center bg-background/50">
+								<div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+							</div>
+						)}
+					</div>
+				);
+			},
+		},
+		{
+			accessorKey: "dueDate",
+			header: "Due Date",
+			cell: ({ row }) => {
+				const dueDate = new Date(row.original.dueDate);
+				const isOverdue =
+					dueDate < new Date() && row.original.status !== "Done";
+
+				return (
+					<div
+						className={`text-sm ${isOverdue ? "text-red-600 font-medium" : ""}`}
+					>
+						<div>{dueDate.toLocaleDateString()}</div>
+						<div className="text-xs text-muted-foreground">
+							{dueDate.toLocaleTimeString([], {
+								hour: "2-digit",
+								minute: "2-digit",
+							})}
+						</div>
+					</div>
+				);
+			},
+		},
+		{
+			accessorKey: "received",
+			header: () => <div className="w-full text-right">Received Grade</div>,
+			cell: ({ row }) => {
+				const [value, setValue] = React.useState<number | "">(
+					row.original.received === -1 ? "" : row.original.received,
+				);
+				const [isUpdating, setIsUpdating] = React.useState(false);
+
+				const handleSave = async () => {
+					if (value === "") return;
+
+					const newValue = Number(value);
+					if (newValue === row.original.received) return;
+
+					setIsUpdating(true);
+					try {
+						await updateAssignment({
+							id: row.original.id as Id<"assignments">,
+							received: newValue,
+						});
+					} catch (error) {
+						console.error("Failed to update received grade:", error);
+						setValue(row.original.received === -1 ? "" : row.original.received);
+					} finally {
+						setIsUpdating(false);
+					}
+				};
+
+				if (row.original.received === -1) {
+					return (
+						<div className="text-muted-foreground text-sm text-right">
+							Grade Not Received Yet
+						</div>
+					);
+				}
+
+				return (
+					<div className="relative">
+						<Label htmlFor={`${row.original.id}-received`} className="sr-only">
+							Received Grade
+						</Label>
+						<Input
+							className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+							value={value}
+							onChange={(e) =>
+								setValue(e.target.value === "" ? "" : Number(e.target.value))
+							}
+							onBlur={handleSave}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									e.currentTarget.blur();
+								}
+							}}
+							id={`${row.original.id}-received`}
+							type="number"
+							disabled={isUpdating}
+						/>
+						{isUpdating && (
+							<div className="absolute inset-0 flex items-center justify-center bg-background/50">
+								<div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+							</div>
+						)}
+					</div>
+				);
+			},
+		},
+		{
+			accessorKey: "class",
+			header: "Class",
+			cell: ({ row }) => {
+				const [selectedClass, setSelectedClass] = React.useState(
+					row.original.class,
+				);
+
+				const handleClassChange = async (value: string) => {
+					setSelectedClass(value);
+					try {
+						await updateAssignment({
+							id: row.original.id as Id<"assignments">,
+							class: value,
+						});
+					} catch (error) {
+						console.error("Failed to update class:", error);
+						// Revert to original value on error
+						setSelectedClass(row.original.class);
+					}
+				};
+
+				const isAssigned = row.original.class !== "Assign class";
+
+				if (isAssigned) {
+					return row.original.class;
+				}
+
+				return (
+					<>
+						<Label htmlFor={`${row.original.id}-class`} className="sr-only">
+							Class
+						</Label>
+						<Select value={selectedClass} onValueChange={handleClassChange}>
+							<SelectTrigger
+								className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
+								size="sm"
+								id={`${row.original.id}-class`}
+							>
+								<SelectValue placeholder="Assign class" />
+							</SelectTrigger>
+							<SelectContent align="end">
+								<SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
+								<SelectItem value="Jamik Tashpulatov">
+									Jamik Tashpulatov
+								</SelectItem>
+								<SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
+							</SelectContent>
+						</Select>
+					</>
+				);
+			},
+		},
+		{
+			id: "actions",
+			cell: ({ row }) => <ActionsCell row={row} />,
+		},
+	];
+}
 
 function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
 	const { transform, transition, setNodeRef, isDragging } = useSortable({
@@ -383,6 +505,13 @@ export function DataTable({
 	const dataIds = React.useMemo<UniqueIdentifier[]>(
 		() => data?.map(({ id }) => String(id)) || [],
 		[data],
+	);
+
+	const updateAssignment = useMutation(api.assignments.update);
+
+	const columns = React.useMemo(
+		() => getColumns(updateAssignment),
+		[updateAssignment],
 	);
 
 	const table = useReactTable({
@@ -791,9 +920,21 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 								<Input id="target" defaultValue={item.target} />
 							</div>
 							<div className="flex flex-col gap-3">
-								<Label htmlFor="received">Received Grade</Label>
-								<Input id="received" defaultValue={item.received} />
+								<Label htmlFor="dueDate">Due Date & Time</Label>
+								<div className="text-sm p-2 border rounded bg-muted/50">
+									{new Date(item.dueDate).toLocaleString()}
+								</div>
 							</div>
+						</div>
+						<div className="flex flex-col gap-3">
+							<Label htmlFor="received">Received Grade</Label>
+							{item.received === -1 ? (
+								<div className="text-muted-foreground text-sm p-2 border rounded">
+									Grade Not Received Yet
+								</div>
+							) : (
+								<Input id="received" defaultValue={item.received} />
+							)}
 						</div>
 						<div className="flex flex-col gap-3">
 							<Label htmlFor="class">Class</Label>

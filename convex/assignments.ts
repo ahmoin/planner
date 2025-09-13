@@ -8,14 +8,15 @@ export const add = mutation({
 		type: v.string(),
 		status: v.string(),
 		target: v.number(),
-		received: v.number(),
 		class: v.string(),
+		dueDate: v.string(),
 	},
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) throw new Error("Not authenticated");
 		return await ctx.db.insert("assignments", {
 			...args,
+			received: -1,
 			userId,
 			createdAt: Date.now(),
 		});
@@ -39,7 +40,38 @@ export const list = query({
 			target: assignment.target,
 			received: assignment.received,
 			class: assignment.class,
+			dueDate: assignment.dueDate,
 		}));
+	},
+});
+
+export const update = mutation({
+	args: {
+		id: v.id("assignments"),
+		assignment: v.optional(v.string()),
+		type: v.optional(v.string()),
+		status: v.optional(v.string()),
+		target: v.optional(v.number()),
+		received: v.optional(v.number()),
+		class: v.optional(v.string()),
+		dueDate: v.optional(v.string()),
+	},
+	handler: async (ctx, args) => {
+		const userId = await getAuthUserId(ctx);
+		if (!userId) throw new Error("Not authenticated");
+
+		const assignment = await ctx.db.get(args.id);
+		if (!assignment || assignment.userId !== userId) {
+			throw new Error("Assignment not found or unauthorized");
+		}
+
+		const { id, ...updateData } = args;
+		// Only include fields that are defined
+		const fieldsToUpdate = Object.fromEntries(
+			Object.entries(updateData).filter(([_, value]) => value !== undefined),
+		);
+
+		await ctx.db.patch(id, fieldsToUpdate);
 	},
 });
 

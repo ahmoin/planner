@@ -11,7 +11,6 @@ import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import data from "@/lib/mock-data.json";
 
 export default function IndexPage() {
 	const [showAuthModal, setShowAuthModal] = React.useState(false);
@@ -19,8 +18,13 @@ export default function IndexPage() {
 		React.useState(false);
 	const [authFlow, setAuthFlow] = React.useState<"signIn" | "signUp">("signUp");
 	const user = useQuery(api.users.viewer);
-	const assignments = useQuery(api.assignments.list, user ? {} : "skip");
-	const tableData = user ? (assignments ?? []) : data;
+	const assignmentsQuery = useQuery(api.assignments.list);
+	const assignments = React.useMemo(
+		() => assignmentsQuery || [],
+		[assignmentsQuery],
+	);
+
+	const tableData = user ? assignments : [];
 
 	return (
 		<SidebarProvider
