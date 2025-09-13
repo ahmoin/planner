@@ -16,6 +16,7 @@ export default function IndexPage() {
 	const [showAuthModal, setShowAuthModal] = React.useState(false);
 	const [authFlow, setAuthFlow] = React.useState<"signIn" | "signUp">("signUp");
 	const user = useQuery(api.users.viewer);
+	const tableData = user ? [] : data;
 
 	return (
 		<SidebarProvider
@@ -42,7 +43,7 @@ export default function IndexPage() {
 							<div className="px-4 lg:px-6">
 								<ChartAreaInteractive />
 							</div>
-							<DataTable data={data} setShowAuthModal={setShowAuthModal} />
+							<DataTable data={tableData} setShowAuthModal={setShowAuthModal} />
 						</div>
 					</div>
 				</div>

@@ -339,6 +339,7 @@ export function DataTable({
 	setShowAuthModal: (showAuthModal: boolean) => void;
 }) {
 	const [data, setData] = React.useState(() => initialData);
+
 	const [rowSelection, setRowSelection] = React.useState({});
 	const [columnVisibility, setColumnVisibility] =
 		React.useState<VisibilityState>({});
@@ -405,6 +406,10 @@ export function DataTable({
 			});
 		}
 	}
+
+	React.useEffect(() => {
+		setData(initialData);
+	}, [initialData]);
 
 	return (
 		<Tabs
