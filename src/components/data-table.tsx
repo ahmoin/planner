@@ -31,6 +31,8 @@ import {
 	IconLayoutColumns,
 	IconLoader,
 	IconPlus,
+	IconProgress,
+	IconTimeDuration0,
 } from "@tabler/icons-react";
 import {
 	type ColumnDef,
@@ -56,15 +58,7 @@ import type { Id } from "@/../convex/_generated/dataModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-	Drawer,
-	DrawerClose,
-	DrawerContent,
-	DrawerFooter,
-	DrawerHeader,
-	DrawerTitle,
-	DrawerTrigger,
-} from "@/components/ui/drawer";
+
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -91,7 +85,6 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 export const schema = z.object({
 	id: z.union([z.number(), z.string(), z.custom<Id<"assignments">>()]),
@@ -214,33 +207,171 @@ function getColumns(
 		{
 			accessorKey: "assignment",
 			header: "Assignment",
-			cell: ({ row }) => <TableCellViewer item={row.original} />,
+			cell: ({ row }) => {
+				const [value, setValue] = React.useState(row.original.assignment);
+				const [isUpdating, setIsUpdating] = React.useState(false);
+
+				const handleSave = async () => {
+					if (value === "" || value === row.original.assignment) return;
+
+					setIsUpdating(true);
+					try {
+						await updateAssignment({
+							id: row.original.id as Id<"assignments">,
+							assignment: value,
+						});
+					} catch (error) {
+						console.error("Failed to update assignment name:", error);
+						setValue(row.original.assignment);
+					} finally {
+						setIsUpdating(false);
+					}
+				};
+
+				return (
+					<div className="relative min-w-[200px]">
+						<Label
+							htmlFor={`${row.original.id}-assignment`}
+							className="sr-only"
+						>
+							Assignment Name
+						</Label>
+						<Input
+							className="border-transparent bg-transparent shadow-none hover:bg-accent/50 focus-visible:bg-background focus-visible:border-ring font-medium"
+							value={value}
+							onChange={(e) => setValue(e.target.value)}
+							onBlur={handleSave}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									e.currentTarget.blur();
+								}
+							}}
+							id={`${row.original.id}-assignment`}
+							disabled={isUpdating}
+							placeholder="Assignment name"
+						/>
+						{isUpdating && (
+							<div className="absolute inset-0 flex items-center justify-center bg-background/50">
+								<div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+							</div>
+						)}
+					</div>
+				);
+			},
 			enableHiding: false,
 		},
 		{
 			accessorKey: "type",
-			header: "Section Type",
-			cell: ({ row }) => (
-				<div className="w-32">
-					<Badge variant="outline" className="text-muted-foreground px-1.5">
-						{row.original.type}
-					</Badge>
-				</div>
-			),
+			header: "Type",
+			cell: ({ row }) => {
+				const [value, setValue] = React.useState(row.original.type);
+				const [isUpdating, setIsUpdating] = React.useState(false);
+
+				const handleSave = async () => {
+					if (value === "" || value === row.original.type) return;
+
+					setIsUpdating(true);
+					try {
+						await updateAssignment({
+							id: row.original.id as Id<"assignments">,
+							type: value,
+						});
+					} catch (error) {
+						console.error("Failed to update type:", error);
+						setValue(row.original.type);
+					} finally {
+						setIsUpdating(false);
+					}
+				};
+
+				return (
+					<div className="w-32 relative">
+						<Label htmlFor={`${row.original.id}-type`} className="sr-only">
+							Type
+						</Label>
+						<Input
+							className="h-6 px-1.5 text-xs border-muted-foreground/20 bg-transparent text-muted-foreground rounded-md shadow-none hover:bg-accent/50 focus-visible:bg-background focus-visible:border-ring"
+							value={value}
+							onChange={(e) => setValue(e.target.value)}
+							onBlur={handleSave}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									e.currentTarget.blur();
+								}
+							}}
+							id={`${row.original.id}-type`}
+							disabled={isUpdating}
+						/>
+						{isUpdating && (
+							<div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-md">
+								<div className="h-2 w-2 animate-spin rounded-full border border-primary border-t-transparent" />
+							</div>
+						)}
+					</div>
+				);
+			},
 		},
 		{
 			accessorKey: "status",
 			header: "Status",
-			cell: ({ row }) => (
-				<Badge variant="outline" className="text-muted-foreground px-1.5">
-					{row.original.status === "Done" ? (
-						<IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-					) : (
-						<IconLoader />
-					)}
-					{row.original.status}
-				</Badge>
-			),
+			cell: ({ row }) => {
+				const [selectedStatus, setSelectedStatus] = React.useState(
+					row.original.status,
+				);
+				const [isOpen, setIsOpen] = React.useState(false);
+
+				const handleStatusChange = async (value: string) => {
+					setSelectedStatus(value);
+					setIsOpen(false);
+					try {
+						await updateAssignment({
+							id: row.original.id as Id<"assignments">,
+							status: value,
+						});
+					} catch (error) {
+						console.error("Failed to update status:", error);
+						setSelectedStatus(row.original.status);
+					}
+				};
+
+				return (
+					<DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+						<DropdownMenuTrigger asChild>
+							<Badge
+								variant="outline"
+								className="text-muted-foreground px-1.5 cursor-pointer hover:bg-accent transition-colors"
+							>
+								{selectedStatus === "Done" ? (
+									<IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+								) : selectedStatus === "In Progress" ? (
+									<IconProgress />
+								) : (
+									<IconTimeDuration0 />
+								)}
+								{selectedStatus}
+							</Badge>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="start">
+							<DropdownMenuItem
+								onClick={() => handleStatusChange("Not Started")}
+							>
+								<IconLoader className="mr-2 h-4 w-4" />
+								Not Started
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								onClick={() => handleStatusChange("In Progress")}
+							>
+								<IconLoader className="mr-2 h-4 w-4" />
+								In Progress
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => handleStatusChange("Done")}>
+								<IconCircleCheckFilled className="mr-2 h-4 w-4 fill-green-500 dark:fill-green-400" />
+								Done
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				);
+			},
 		},
 		{
 			accessorKey: "target",
@@ -304,7 +435,9 @@ function getColumns(
 			cell: ({ row }) => {
 				const dueDate = new Date(row.original.dueDate);
 				const isOverdue =
-					dueDate < new Date() && row.original.status !== "Done";
+					dueDate < new Date() &&
+					row.original.status !== "Done" &&
+					row.original.received === -1;
 
 				return (
 					<div
@@ -323,7 +456,7 @@ function getColumns(
 		},
 		{
 			accessorKey: "received",
-			header: () => <div className="w-full text-right">Received Grade</div>,
+			header: "Received Grade",
 			cell: ({ row }) => {
 				const [value, setValue] = React.useState<number | "">(
 					row.original.received === -1 ? "" : row.original.received,
@@ -331,9 +464,7 @@ function getColumns(
 				const [isUpdating, setIsUpdating] = React.useState(false);
 
 				const handleSave = async () => {
-					if (value === "") return;
-
-					const newValue = Number(value);
+					const newValue = value === "" ? -1 : Number(value);
 					if (newValue === row.original.received) return;
 
 					setIsUpdating(true);
@@ -349,14 +480,6 @@ function getColumns(
 						setIsUpdating(false);
 					}
 				};
-
-				if (row.original.received === -1) {
-					return (
-						<div className="text-muted-foreground text-sm text-right">
-							Grade Not Received Yet
-						</div>
-					);
-				}
 
 				return (
 					<div className="relative">
@@ -377,6 +500,7 @@ function getColumns(
 							}}
 							id={`${row.original.id}-received`}
 							type="number"
+							placeholder="..."
 							disabled={isUpdating}
 						/>
 						{isUpdating && (
@@ -405,7 +529,6 @@ function getColumns(
 						});
 					} catch (error) {
 						console.error("Failed to update class:", error);
-						// Revert to original value on error
 						setSelectedClass(row.original.class);
 					}
 				};
@@ -790,176 +913,5 @@ export function DataTable({
 				<div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
 			</TabsContent>
 		</Tabs>
-	);
-}
-
-function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
-	const isMobile = useIsMobile();
-
-	return (
-		<Drawer direction={isMobile ? "bottom" : "right"}>
-			<DrawerTrigger asChild>
-				<Button variant="link" className="text-foreground w-fit px-0 text-left">
-					{item.assignment}
-				</Button>
-			</DrawerTrigger>
-			<DrawerContent>
-				<DrawerHeader className="gap-1">
-					<DrawerTitle>{item.assignment}</DrawerTitle>
-					{/* <DrawerDescription>
-						Showing total visitors for the last 6 months
-					</DrawerDescription> */}
-				</DrawerHeader>
-				<div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-					{/* {!isMobile && (
-						<>
-							<ChartContainer config={chartConfig}>
-								<AreaChart
-									accessibilityLayer
-									data={chartData}
-									margin={{
-										left: 0,
-										right: 10,
-									}}
-								>
-									<CartesianGrid vertical={false} />
-									<XAxis
-										dataKey="month"
-										tickLine={false}
-										axisLine={false}
-										tickMargin={8}
-										tickFormatter={(value) => value.slice(0, 3)}
-										hide
-									/>
-									<ChartTooltip
-										cursor={false}
-										content={<ChartTooltipContent indicator="dot" />}
-									/>
-									<Area
-										dataKey="mobile"
-										type="natural"
-										fill="var(--color-mobile)"
-										fillOpacity={0.6}
-										stroke="var(--color-mobile)"
-										stackId="a"
-									/>
-									<Area
-										dataKey="desktop"
-										type="natural"
-										fill="var(--color-desktop)"
-										fillOpacity={0.4}
-										stroke="var(--color-desktop)"
-										stackId="a"
-									/>
-								</AreaChart>
-							</ChartContainer>
-							<Separator />
-							<div className="grid gap-2">
-								<div className="flex gap-2 leading-none font-medium">
-									Trending up by 5.2% this month{" "}
-									<IconTrendingUp className="size-4" />
-								</div>
-								<div className="text-muted-foreground">
-									Showing total visitors for the last 6 months. This is just
-									some random text to test the layout. It spans multiple lines
-									and should wrap around.
-								</div>
-							</div>
-							<Separator />
-						</>
-					)} */}
-					<form className="flex flex-col gap-4">
-						<div className="flex flex-col gap-3">
-							<Label htmlFor="assignment">Assignment</Label>
-							<Input id="assignment" defaultValue={item.assignment} />
-						</div>
-						<div className="grid grid-cols-2 gap-4">
-							<div className="flex flex-col gap-3">
-								<Label htmlFor="type">Type</Label>
-								<Select defaultValue={item.type}>
-									<SelectTrigger id="type" className="w-full">
-										<SelectValue placeholder="Select a type" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="Table of Contents">
-											Table of Contents
-										</SelectItem>
-										<SelectItem value="Executive Summary">
-											Executive Summary
-										</SelectItem>
-										<SelectItem value="Technical Approach">
-											Technical Approach
-										</SelectItem>
-										<SelectItem value="Design">Design</SelectItem>
-										<SelectItem value="Capabilities">Capabilities</SelectItem>
-										<SelectItem value="Focus Documents">
-											Focus Documents
-										</SelectItem>
-										<SelectItem value="Narrative">Narrative</SelectItem>
-										<SelectItem value="Assignment">Assignment</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-							<div className="flex flex-col gap-3">
-								<Label htmlFor="status">Status</Label>
-								<Select defaultValue={item.status}>
-									<SelectTrigger id="status" className="w-full">
-										<SelectValue placeholder="Select a status" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="Done">Done</SelectItem>
-										<SelectItem value="In Progress">In Progress</SelectItem>
-										<SelectItem value="Not Started">Not Started</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-						</div>
-						<div className="grid grid-cols-2 gap-4">
-							<div className="flex flex-col gap-3">
-								<Label htmlFor="target">Target Grade</Label>
-								<Input id="target" defaultValue={item.target} />
-							</div>
-							<div className="flex flex-col gap-3">
-								<Label htmlFor="dueDate">Due Date & Time</Label>
-								<div className="text-sm p-2 border rounded bg-muted/50">
-									{new Date(item.dueDate).toLocaleString()}
-								</div>
-							</div>
-						</div>
-						<div className="flex flex-col gap-3">
-							<Label htmlFor="received">Received Grade</Label>
-							{item.received === -1 ? (
-								<div className="text-muted-foreground text-sm p-2 border rounded">
-									Grade Not Received Yet
-								</div>
-							) : (
-								<Input id="received" defaultValue={item.received} />
-							)}
-						</div>
-						<div className="flex flex-col gap-3">
-							<Label htmlFor="class">Class</Label>
-							<Select defaultValue={item.class}>
-								<SelectTrigger id="class" className="w-full">
-									<SelectValue placeholder="Select a class" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-									<SelectItem value="Jamik Tashpulatov">
-										Jamik Tashpulatov
-									</SelectItem>
-									<SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-					</form>
-				</div>
-				<DrawerFooter>
-					<Button>Submit</Button>
-					<DrawerClose asChild>
-						<Button variant="outline">Done</Button>
-					</DrawerClose>
-				</DrawerFooter>
-			</DrawerContent>
-		</Drawer>
 	);
 }
