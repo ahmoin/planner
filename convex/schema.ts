@@ -27,6 +27,16 @@ const schema = defineSchema({
 		dueDate: v.string(),
 		createdAt: v.number(),
 	}),
+	userClasses: defineTable({
+		userId: v.id("users"),
+		name: v.string(),
+		createdAt: v.number(),
+	}).index("by_user", ["userId"]),
+	userTypes: defineTable({
+		userId: v.id("users"),
+		name: v.string(),
+		createdAt: v.number(),
+	}).index("by_user", ["userId"]),
 });
 
 export default schema;

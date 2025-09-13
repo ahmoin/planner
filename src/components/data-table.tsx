@@ -744,6 +744,7 @@ export function DataTable({
 	setShowAddAssignmentDialog: (showAddAssignmentDialog: boolean) => void;
 }) {
 	const [data, setData] = React.useState(() => initialData);
+	const [activeTab, setActiveTab] = React.useState("all");
 
 	const [rowSelection, setRowSelection] = React.useState({});
 	const [columnVisibility, setColumnVisibility] =
@@ -763,9 +764,90 @@ export function DataTable({
 		useSensor(KeyboardSensor, {}),
 	);
 
+	// Filter data based on active tab
+	const filteredData = React.useMemo(() => {
+		const now = new Date();
+		const startOfWeek = new Date(now);
+		startOfWeek.setDate(now.getDate() - now.getDay());
+		startOfWeek.setHours(0, 0, 0, 0);
+
+		const endOfWeek = new Date(startOfWeek);
+		endOfWeek.setDate(startOfWeek.getDate() + 6);
+		endOfWeek.setHours(23, 59, 59, 999);
+
+		const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+		const endOfMonth = new Date(
+			now.getFullYear(),
+			now.getMonth() + 1,
+			0,
+			23,
+			59,
+			59,
+			999,
+		);
+
+		switch (activeTab) {
+			case "this-week":
+				return data.filter((assignment) => {
+					const dueDate = new Date(assignment.dueDate);
+					return dueDate >= startOfWeek && dueDate <= endOfWeek;
+				});
+			case "this-month":
+				return data.filter((assignment) => {
+					const dueDate = new Date(assignment.dueDate);
+					return dueDate >= startOfMonth && dueDate <= endOfMonth;
+				});
+			case "late":
+				return data.filter((assignment) => {
+					const dueDate = new Date(assignment.dueDate);
+					const currentTime = new Date();
+					return (
+						dueDate.getTime() < currentTime.getTime() &&
+						assignment.status !== "Done" &&
+						assignment.received === -1
+					);
+				});
+			default:
+				return data;
+		}
+	}, [data, activeTab]);
+
+	// Count assignments for badges
+	const assignmentCounts = React.useMemo(() => {
+		const now = new Date();
+		const startOfWeek = new Date(now);
+		startOfWeek.setDate(now.getDate() - now.getDay());
+		startOfWeek.setHours(0, 0, 0, 0);
+
+		const endOfWeek = new Date(startOfWeek);
+		endOfWeek.setDate(startOfWeek.getDate() + 6);
+		endOfWeek.setHours(23, 59, 59, 999);
+
+		const thisWeekCount = data.filter((assignment) => {
+			const dueDate = new Date(assignment.dueDate);
+			return (
+				dueDate >= startOfWeek &&
+				dueDate <= endOfWeek &&
+				assignment.status !== "Done"
+			);
+		}).length;
+
+		const lateCount = data.filter((assignment) => {
+			const dueDate = new Date(assignment.dueDate);
+			const currentTime = new Date();
+			return (
+				dueDate.getTime() < currentTime.getTime() &&
+				assignment.status !== "Done" &&
+				assignment.received === -1
+			);
+		}).length;
+
+		return { thisWeekCount, lateCount };
+	}, [data]);
+
 	const dataIds = React.useMemo<UniqueIdentifier[]>(
-		() => data?.map(({ id }) => String(id)) || [],
-		[data],
+		() => filteredData?.map(({ id }) => String(id)) || [],
+		[filteredData],
 	);
 
 	const updateAssignment = useMutation(api.assignments.update);
@@ -776,7 +858,7 @@ export function DataTable({
 	);
 
 	const table = useReactTable({
-		data,
+		data: filteredData,
 		columns,
 		state: {
 			sorting,
@@ -826,14 +908,15 @@ export function DataTable({
 
 	return (
 		<Tabs
-			defaultValue="outline"
+			value={activeTab}
+			onValueChange={setActiveTab}
 			className="w-full flex-col justify-start gap-6"
 		>
 			<div className="flex items-center justify-between px-4 lg:px-6">
 				<Label htmlFor="view-selector" className="sr-only">
 					View
 				</Label>
-				<Select defaultValue="outline">
+				<Select value={activeTab} onValueChange={setActiveTab}>
 					<SelectTrigger
 						className="flex w-fit @4xl/main:hidden"
 						size="sm"
@@ -842,21 +925,29 @@ export function DataTable({
 						<SelectValue placeholder="Select a view" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="outline">Outline</SelectItem>
-						<SelectItem value="past-performance">Past Performance</SelectItem>
-						<SelectItem value="key-personnel">Key Personnel</SelectItem>
-						<SelectItem value="focus-documents">Focus Documents</SelectItem>
+						<SelectItem value="all">All</SelectItem>
+						<SelectItem value="this-week">This Week</SelectItem>
+						<SelectItem value="this-month">This Month</SelectItem>
+						<SelectItem value="late">Late</SelectItem>
 					</SelectContent>
 				</Select>
 				<TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
-					<TabsTrigger value="outline">Outline</TabsTrigger>
-					<TabsTrigger value="past-performance">
-						Past Performance <Badge variant="secondary">1</Badge>
+					<TabsTrigger value="all">All</TabsTrigger>
+					<TabsTrigger value="this-week">
+						This Week{" "}
+						{assignmentCounts.thisWeekCount > 0 && (
+							<Badge variant="secondary">
+								{assignmentCounts.thisWeekCount}
+							</Badge>
+						)}
 					</TabsTrigger>
-					<TabsTrigger value="key-personnel">
-						Key Personnel <Badge variant="secondary">2</Badge>
+					<TabsTrigger value="this-month">This Month</TabsTrigger>
+					<TabsTrigger value="late">
+						Late{" "}
+						{assignmentCounts.lateCount > 0 && (
+							<Badge variant="destructive">{assignmentCounts.lateCount}</Badge>
+						)}
 					</TabsTrigger>
-					<TabsTrigger value="focus-documents">Focus Documents</TabsTrigger>
 				</TabsList>
 				<div className="flex items-center gap-2">
 					<DropdownMenu>
@@ -903,7 +994,7 @@ export function DataTable({
 				</div>
 			</div>
 			<TabsContent
-				value="outline"
+				value={activeTab}
 				className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
 			>
 				<div className="overflow-hidden rounded-lg border">
@@ -1034,21 +1125,6 @@ export function DataTable({
 						</div>
 					</div>
 				</div>
-			</TabsContent>
-			<TabsContent
-				value="past-performance"
-				className="flex flex-col px-4 lg:px-6"
-			>
-				<div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
-			</TabsContent>
-			<TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
-				<div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
-			</TabsContent>
-			<TabsContent
-				value="focus-documents"
-				className="flex flex-col px-4 lg:px-6"
-			>
-				<div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
 			</TabsContent>
 		</Tabs>
 	);

@@ -2,6 +2,7 @@
 
 import { type Icon, IconCirclePlusFilled } from "@tabler/icons-react";
 import { useMutation } from "convex/react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { api } from "@/../convex/_generated/api";
 
@@ -65,9 +66,11 @@ export function NavMain({
 				<SidebarMenu>
 					{items.map((item) => (
 						<SidebarMenuItem key={item.title}>
-							<SidebarMenuButton tooltip={item.title}>
-								{item.icon && <item.icon />}
-								<span>{item.title}</span>
+							<SidebarMenuButton tooltip={item.title} asChild>
+								<Link href={item.url}>
+									{item.icon && <item.icon />}
+									<span>{item.title}</span>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					))}

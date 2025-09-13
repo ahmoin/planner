@@ -14,6 +14,41 @@ export const add = mutation({
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) throw new Error("Not authenticated");
+
+		// Check if type exists in user preferences, if not add it
+		if (args.type.trim()) {
+			const existingType = await ctx.db
+				.query("userTypes")
+				.withIndex("by_user", (q) => q.eq("userId", userId))
+				.filter((q) => q.eq(q.field("name"), args.type))
+				.first();
+
+			if (!existingType) {
+				await ctx.db.insert("userTypes", {
+					userId,
+					name: args.type,
+					createdAt: Date.now(),
+				});
+			}
+		}
+
+		// Check if class exists in user preferences, if not add it
+		if (args.class.trim()) {
+			const existingClass = await ctx.db
+				.query("userClasses")
+				.withIndex("by_user", (q) => q.eq("userId", userId))
+				.filter((q) => q.eq(q.field("name"), args.class))
+				.first();
+
+			if (!existingClass) {
+				await ctx.db.insert("userClasses", {
+					userId,
+					name: args.class,
+					createdAt: Date.now(),
+				});
+			}
+		}
+
 		return await ctx.db.insert("assignments", {
 			...args,
 			received: -1,

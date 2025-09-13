@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import * as React from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -47,30 +47,10 @@ interface AddAssignmentDialogProps {
 	onOpenChange: (open: boolean) => void;
 }
 
-const assignmentTypes = [
-	{ value: "essay", label: "Essay" },
-	{ value: "project", label: "Project" },
-	{ value: "exam", label: "Exam" },
-	{ value: "quiz", label: "Quiz" },
-	{ value: "lab", label: "Lab" },
-	{ value: "homework", label: "Homework" },
-	{ value: "presentation", label: "Presentation" },
-	{ value: "research", label: "Research" },
-];
-
 const statusOptions = [
 	{ value: "not-started", label: "Not Started" },
 	{ value: "in-progress", label: "In Progress" },
 	{ value: "done", label: "Done" },
-];
-
-const classOptions = [
-	{ value: "english", label: "English" },
-	{ value: "math", label: "Math" },
-	{ value: "science", label: "Science" },
-	{ value: "language", label: "Language" },
-	{ value: "elective", label: "Elective" },
-	{ value: "history", label: "History" },
 ];
 
 export function AddAssignmentDialog({
@@ -88,6 +68,23 @@ export function AddAssignmentDialog({
 	const [classOpen, setClassOpen] = React.useState(false);
 	const [classValue, setClassValue] = React.useState("");
 	const addAssignment = useMutation(api.assignments.add);
+
+	// Fetch user preferences
+	const userClasses = useQuery(api.userPreferences.getClasses);
+	const userTypes = useQuery(api.userPreferences.getTypes);
+
+	// Use only user preferences (no defaults)
+	const assignmentTypes = React.useMemo(() => {
+		return (
+			userTypes?.map((type) => ({ value: type._id, label: type.name })) || []
+		);
+	}, [userTypes]);
+
+	const classOptions = React.useMemo(() => {
+		return (
+			userClasses?.map((cls) => ({ value: cls._id, label: cls.name })) || []
+		);
+	}, [userClasses]);
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -193,8 +190,15 @@ export function AddAssignmentDialog({
 										/>
 										<CommandList>
 											<CommandEmpty>
-												<div className="px-2 text-center text-sm">
-													Press Enter to use "{typeValue}" as custom type
+												<div className="px-2 py-4 text-center text-sm">
+													{typeValue.trim() ? (
+														<>Press Enter to use "{typeValue}" as custom type</>
+													) : (
+														<>
+															No types found. Add types in Settings to see
+															options here.
+														</>
+													)}
 												</div>
 											</CommandEmpty>
 											<CommandGroup>
@@ -375,8 +379,15 @@ export function AddAssignmentDialog({
 									/>
 									<CommandList>
 										<CommandEmpty>
-											<div className="px-2 text-center text-sm">
-												Press Enter to use "{classValue}" as custom class
+											<div className="px-2 py-4 text-center text-sm">
+												{classValue.trim() ? (
+													<>Press Enter to use "{classValue}" as custom class</>
+												) : (
+													<>
+														No classes found. Add classes in Settings to see
+														options here.
+													</>
+												)}
 											</div>
 										</CommandEmpty>
 										<CommandGroup>
