@@ -35,7 +35,7 @@ const schema = defineSchema({
 		target: v.number(),
 		received: v.number(),
 		class: v.string(),
-		dueDate: v.string(),
+		dueDate: v.number(),
 		submittedDate: v.number(),
 		createdAt: v.number(),
 	}),

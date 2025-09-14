@@ -39,7 +39,7 @@ const addAssignmentSchema = z.object({
 	status: z.string().min(1, "Status is required"),
 	target: z.number().min(0).max(100),
 	class: z.string().min(1, "Class is required"),
-	dueDate: z.string().min(1, "Due date and time are required"),
+	dueDate: z.number().min(0, "Due date and time are required"),
 });
 
 interface AddAssignmentDialogProps {
@@ -92,17 +92,17 @@ export function AddAssignmentDialog({
 
 		const formData = new FormData(e.currentTarget);
 
-		// Combine date and time into ISO string
-		let dueDate = "";
+		// Combine date and time into timestamp
+		let dueDate = 0;
 		if (date && time) {
 			const [hours, minutes] = time.split(":");
 			const combinedDate = new Date(date);
 			combinedDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-			dueDate = combinedDate.toISOString();
+			dueDate = combinedDate.getTime();
 		}
 
 		const data = {
-			assignment: formData.get("assignment") as string,
+			assignment: formData.get("assignment"),
 			type: typeValue,
 			status: statusValue,
 			target: Number(formData.get("target")),

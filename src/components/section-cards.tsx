@@ -35,17 +35,28 @@ export function SectionCards() {
 			(assignment) => assignment.received !== -1 && assignment.received > 0,
 		);
 
+		const stats = {
+			gpa: "N/A",
+			lateAssignments: 0,
+			averageGrade: "N/A",
+			growthRate: "N/A",
+			gpaChange: 0,
+			lateChange: 0,
+			gradeChange: 0,
+			growthChange: 0,
+		};
+
+		stats.lateAssignments = assignments.filter((assignment) => {
+			const dueDate = new Date(Number(assignment.dueDate));
+			const submittedDate =
+				assignment.submittedDate !== -1
+					? new Date(Number(assignment.submittedDate))
+					: null;
+			return submittedDate ? submittedDate > dueDate : false;
+		}).length;
+
 		if (gradedAssignments.length === 0) {
-			return {
-				gpa: "N/A",
-				lateAssignments: 0,
-				averageGrade: "N/A",
-				growthRate: "N/A",
-				gpaChange: 0,
-				lateChange: 0,
-				gradeChange: 0,
-				growthChange: 0,
-			};
+			return stats;
 		}
 
 		const totalGrade = gradedAssignments.reduce(
@@ -54,19 +65,13 @@ export function SectionCards() {
 		);
 		const averageGrade = totalGrade / gradedAssignments.length;
 
-		const gpa = (averageGrade / 100) * 4.0;
-
-		const now = new Date();
-		const lateAssignments = assignments.filter((assignment) => {
-			const dueDate = new Date(assignment.dueDate);
-			return dueDate < now && assignment.submittedDate === -1;
-		}).length;
+		stats.gpa = ((averageGrade / 100) * 4.0).toFixed(2);
+		stats.averageGrade = averageGrade.toFixed(1);
 
 		const sortedAssignments = [...gradedAssignments].sort(
-			(a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
+			(a, b) => Number(a.dueDate) - Number(b.dueDate),
 		);
 
-		let growthRate = 0;
 		if (sortedAssignments.length >= 4) {
 			const recentHalf = sortedAssignments.slice(
 				-Math.floor(sortedAssignments.length / 2),
@@ -81,19 +86,17 @@ export function SectionCards() {
 			const olderAvg =
 				olderHalf.reduce((sum, a) => sum + a.received, 0) / olderHalf.length;
 
-			growthRate = ((recentAvg - olderAvg) / olderAvg) * 100;
+			const growthRate = ((recentAvg - olderAvg) / olderAvg) * 100;
+			stats.growthRate = growthRate.toFixed(1);
 		}
 
-		return {
-			gpa: gpa.toFixed(2),
-			lateAssignments,
-			averageGrade: averageGrade.toFixed(1),
-			growthRate: growthRate.toFixed(1),
-			gpaChange: growthRate > 0 ? 1 : growthRate < 0 ? -1 : 0,
-			lateChange: lateAssignments <= 2 ? -1 : 1,
-			gradeChange: averageGrade >= 85 ? 1 : -1,
-			growthChange: growthRate >= 0 ? 1 : -1,
-		};
+		stats.gpaChange =
+			Number(stats.growthRate) > 0 ? 1 : Number(stats.growthRate) < 0 ? -1 : 0;
+		stats.lateChange = stats.lateAssignments <= 2 ? -1 : 1;
+		stats.gradeChange = Number(stats.averageGrade) >= 85 ? 1 : -1;
+		stats.growthChange = Number(stats.growthRate) >= 0 ? 1 : -1;
+
+		return stats;
 	}, [isAuthenticated, assignments]);
 
 	return (

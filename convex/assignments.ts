@@ -9,7 +9,7 @@ export const add = mutation({
 		status: v.string(),
 		target: v.number(),
 		class: v.string(),
-		dueDate: v.string(),
+		dueDate: v.number(),
 	},
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
@@ -76,7 +76,7 @@ export const list = query({
 			target: assignment.target,
 			received: assignment.received,
 			class: assignment.class,
-			dueDate: assignment.dueDate || new Date().toISOString(),
+			dueDate: assignment.dueDate,
 			submittedDate: assignment.submittedDate || -1,
 		}));
 	},
@@ -91,7 +91,8 @@ export const update = mutation({
 		target: v.optional(v.number()),
 		received: v.optional(v.number()),
 		class: v.optional(v.string()),
-		dueDate: v.optional(v.string()),
+		dueDate: v.optional(v.number()),
+		submittedDate: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);

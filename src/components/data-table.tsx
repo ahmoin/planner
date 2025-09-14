@@ -106,7 +106,7 @@ export const schema = z.object({
 	target: z.number(),
 	received: z.number(),
 	class: z.string(),
-	dueDate: z.string(),
+	dueDate: z.number(),
 	submittedDate: z.number(),
 });
 
@@ -444,15 +444,19 @@ function getColumns(
 			accessorKey: "dueDate",
 			header: "Due Date",
 			cell: ({ row }) => {
-				const dueDate = new Date(row.original.dueDate);
-				const isOverdue =
-					dueDate < new Date() && row.original.submittedDate === -1;
+				const dueDate = new Date(Number(row.original.dueDate));
+				const submittedDate =
+					row.original.submittedDate !== -1
+						? new Date(Number(row.original.submittedDate))
+						: null;
+
+				const isOverdue = submittedDate ? submittedDate > dueDate : false;
 
 				const [date, setDate] = React.useState<Date>(
-					new Date(row.original.dueDate),
+					new Date(Number(row.original.dueDate)),
 				);
 				const [time, setTime] = React.useState(() => {
-					const d = new Date(row.original.dueDate);
+					const d = new Date(Number(row.original.dueDate));
 					return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 				});
 				const [isUpdating, setIsUpdating] = React.useState(false);
@@ -473,13 +477,13 @@ function getColumns(
 
 						await updateAssignment({
 							id: row.original.id as Id<"assignments">,
-							dueDate: combinedDate.toISOString(),
+							dueDate: combinedDate.getTime(),
 						});
 						setDialogOpen(false);
 					} catch (error) {
 						console.error("Failed to update due date:", error);
-						setDate(new Date(row.original.dueDate));
-						const originalDate = new Date(row.original.dueDate);
+						setDate(new Date(Number(row.original.dueDate)));
+						const originalDate = new Date(Number(row.original.dueDate));
 						setTime(
 							`${String(originalDate.getHours()).padStart(2, "0")}:${String(originalDate.getMinutes()).padStart(2, "0")}`,
 						);
@@ -489,8 +493,8 @@ function getColumns(
 				};
 
 				const handleCancel = () => {
-					setDate(new Date(row.original.dueDate));
-					const originalDate = new Date(row.original.dueDate);
+					setDate(new Date(Number(row.original.dueDate)));
+					const originalDate = new Date(Number(row.original.dueDate));
 					setTime(
 						`${String(originalDate.getHours()).padStart(2, "0")}:${String(originalDate.getMinutes()).padStart(2, "0")}`,
 					);
@@ -706,27 +710,298 @@ function getColumns(
 			accessorKey: "submittedDate",
 			header: "Submitted",
 			cell: ({ row }) => {
-				const submittedDate = row.original.submittedDate;
+				const [date, setDate] = React.useState<Date | null>(
+					row.original.submittedDate === -1
+						? null
+						: new Date(row.original.submittedDate),
+				);
+				const [time, setTime] = React.useState(() => {
+					if (row.original.submittedDate === -1) return "23:59";
+					const d = new Date(row.original.submittedDate);
+					return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+				});
+				const [isUpdating, setIsUpdating] = React.useState(false);
+				const [dialogOpen, setDialogOpen] = React.useState(false);
+				const [datePickerOpen, setDatePickerOpen] = React.useState(false);
 
-				if (submittedDate === -1) {
+				const handleSave = async () => {
+					setIsUpdating(true);
+					try {
+						let newDate: Date | null = null;
+
+						if (date) {
+							const [hours, minutes] = time.split(":");
+							newDate = new Date(date);
+							newDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+						}
+
+						await updateAssignment({
+							id: row.original.id as Id<"assignments">,
+							submittedDate: newDate ? newDate.getTime() : -1,
+						});
+						setDialogOpen(false);
+					} catch (error) {
+						console.error("Failed to update submitted date:", error);
+						setDate(
+							row.original.submittedDate === -1
+								? null
+								: new Date(row.original.submittedDate),
+						);
+						if (row.original.submittedDate !== -1) {
+							const originalDate = new Date(row.original.submittedDate);
+							setTime(
+								`${String(originalDate.getHours()).padStart(2, "0")}:${String(originalDate.getMinutes()).padStart(2, "0")}`,
+							);
+						}
+					} finally {
+						setIsUpdating(false);
+					}
+				};
+
+				const handleCancel = () => {
+					setDate(
+						row.original.submittedDate === -1
+							? null
+							: new Date(row.original.submittedDate),
+					);
+					if (row.original.submittedDate !== -1) {
+						const originalDate = new Date(row.original.submittedDate);
+						setTime(
+							`${String(originalDate.getHours()).padStart(2, "0")}:${String(originalDate.getMinutes()).padStart(2, "0")}`,
+						);
+					}
+					setDialogOpen(false);
+					setDatePickerOpen(false);
+				};
+
+				const handleClear = async () => {
+					setIsUpdating(true);
+					try {
+						await updateAssignment({
+							id: row.original.id as Id<"assignments">,
+							submittedDate: -1,
+						});
+						setDate(null);
+						setDialogOpen(false);
+					} catch (error) {
+						console.error("Failed to clear submitted date:", error);
+					} finally {
+						setIsUpdating(false);
+					}
+				};
+
+				if (row.original.submittedDate === -1) {
 					return (
-						<div className="text-sm text-muted-foreground">
-							Not submitted yet
-						</div>
+						<>
+							<button
+								type="button"
+								className="w-full text-left text-sm text-muted-foreground cursor-pointer hover:bg-accent/50 rounded p-1 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+								onClick={() => setDialogOpen(true)}
+								onKeyDown={(e) => {
+									if (e.key === "Enter" || e.key === " ") {
+										e.preventDefault();
+										setDialogOpen(true);
+									}
+								}}
+							>
+								Not submitted yet
+							</button>
+
+							<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+								<DialogContent className="sm:max-w-[425px]">
+									<DialogHeader>
+										<DialogTitle>Set Submitted Date</DialogTitle>
+									</DialogHeader>
+									<div className="space-y-4">
+										<div className="grid grid-cols-2 gap-4">
+											<div className="space-y-2">
+												<Label htmlFor="submitted-date-picker">
+													Submitted Date
+												</Label>
+												<Popover
+													open={datePickerOpen}
+													onOpenChange={setDatePickerOpen}
+												>
+													<PopoverTrigger asChild>
+														<Button
+															variant="outline"
+															className="w-full justify-between font-normal"
+														>
+															{date
+																? date.toLocaleDateString("en-US")
+																: "Select date"}
+															<IconChevronDown className="h-4 w-4" />
+														</Button>
+													</PopoverTrigger>
+													<PopoverContent
+														className="w-auto overflow-hidden p-0"
+														align="start"
+													>
+														<Calendar
+															mode="single"
+															selected={date || undefined}
+															onSelect={(selectedDate) => {
+																if (selectedDate) {
+																	setDate(selectedDate);
+																	setDatePickerOpen(false);
+																}
+															}}
+															captionLayout="dropdown"
+														/>
+													</PopoverContent>
+												</Popover>
+											</div>
+
+											<div className="space-y-2">
+												<Label htmlFor="submitted-time-picker">Time</Label>
+												<Input
+													type="time"
+													id="submitted-time-picker"
+													value={time}
+													onChange={(e) => setTime(e.target.value)}
+													className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+												/>
+											</div>
+										</div>
+									</div>
+									<DialogFooter className="sm:justify-between">
+										<Button
+											type="button"
+											variant="ghost"
+											onClick={() => setDialogOpen(false)}
+											disabled={isUpdating}
+										>
+											Cancel
+										</Button>
+										<div className="space-x-2">
+											<Button
+												type="button"
+												variant="outline"
+												onClick={handleClear}
+												disabled={isUpdating}
+											>
+												Clear
+											</Button>
+											<Button
+												onClick={handleSave}
+												disabled={isUpdating || !date}
+											>
+												{isUpdating ? "Saving..." : "Save"}
+											</Button>
+										</div>
+									</DialogFooter>
+								</DialogContent>
+							</Dialog>
+						</>
 					);
 				}
 
-				const date = new Date(submittedDate);
+				const submittedDate = new Date(row.original.submittedDate);
 				return (
-					<div className="text-sm">
-						<div>{date.toLocaleDateString("en-US")}</div>
-						<div className="text-xs text-muted-foreground">
-							{date.toLocaleTimeString([], {
-								hour: "2-digit",
-								minute: "2-digit",
-							})}
-						</div>
-					</div>
+					<>
+						<Button
+							variant="ghost"
+							className="w-full h-auto p-1 text-left text-sm justify-start font-normal"
+							onClick={() => setDialogOpen(true)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter" || e.key === " ") {
+									e.preventDefault();
+									setDialogOpen(true);
+								}
+							}}
+						>
+							<div>{submittedDate.toLocaleDateString("en-US")}</div>
+							<div className="text-xs text-muted-foreground">
+								{submittedDate.toLocaleTimeString([], {
+									hour: "2-digit",
+									minute: "2-digit",
+								})}
+							</div>
+						</Button>
+
+						<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+							<DialogContent className="sm:max-w-[425px]">
+								<DialogHeader>
+									<DialogTitle>Edit Submitted Date</DialogTitle>
+								</DialogHeader>
+								<div className="space-y-4">
+									<div className="grid grid-cols-2 gap-4">
+										<div className="space-y-2">
+											<Label htmlFor="submitted-date-picker">
+												Submitted Date
+											</Label>
+											<Popover
+												open={datePickerOpen}
+												onOpenChange={setDatePickerOpen}
+											>
+												<PopoverTrigger asChild>
+													<Button
+														variant="outline"
+														className="w-full justify-between font-normal"
+													>
+														{date
+															? date.toLocaleDateString("en-US")
+															: "Select date"}
+														<IconChevronDown className="h-4 w-4" />
+													</Button>
+												</PopoverTrigger>
+												<PopoverContent
+													className="w-auto overflow-hidden p-0"
+													align="start"
+												>
+													<Calendar
+														mode="single"
+														selected={date || undefined}
+														onSelect={(selectedDate) => {
+															if (selectedDate) {
+																setDate(selectedDate);
+																setDatePickerOpen(false);
+															}
+														}}
+														captionLayout="dropdown"
+													/>
+												</PopoverContent>
+											</Popover>
+										</div>
+
+										<div className="space-y-2">
+											<Label htmlFor="submitted-time-picker">Time</Label>
+											<Input
+												type="time"
+												id="submitted-time-picker"
+												value={time}
+												onChange={(e) => setTime(e.target.value)}
+												className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+											/>
+										</div>
+									</div>
+								</div>
+								<DialogFooter className="sm:justify-between">
+									<Button
+										type="button"
+										variant="ghost"
+										onClick={handleCancel}
+										disabled={isUpdating}
+									>
+										Cancel
+									</Button>
+									<div className="space-x-2">
+										<Button
+											type="button"
+											variant="outline"
+											onClick={handleClear}
+											disabled={isUpdating}
+										>
+											Clear
+										</Button>
+										<Button onClick={handleSave} disabled={isUpdating}>
+											{isUpdating ? "Saving..." : "Save"}
+										</Button>
+									</div>
+								</DialogFooter>
+							</DialogContent>
+						</Dialog>
+					</>
 				);
 			},
 		},

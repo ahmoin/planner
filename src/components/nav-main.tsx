@@ -46,7 +46,7 @@ export function NavMain({
 			status: "In Progress",
 			target: 85,
 			class: "Undefined",
-			dueDate: tomorrow.toISOString(),
+			dueDate: tomorrow.getTime(),
 		};
 
 		try {

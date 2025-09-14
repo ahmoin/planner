@@ -178,7 +178,9 @@ export function ChartAreaInteractive() {
 			{};
 
 		gradedAssignments.forEach((assignment) => {
-			const date = new Date(assignment.dueDate).toISOString().split("T")[0];
+			const date = new Date(Number(assignment.dueDate))
+				.toISOString()
+				.split("T")[0];
 			if (!dateGroups[date]) {
 				dateGroups[date] = { grades: [], targets: [] };
 			}
