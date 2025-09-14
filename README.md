@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Academic Planner
 
-## Getting Started
+A personalized assignment scheduler designed to help students manage their
+academic workload effectively by tracking assignments, grades, and study
+progress in one intuitive interface.
 
-First, run the development server:
+## About the Project
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Inspiration
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+As a student, I often found myself overwhelmed by the sheer volume of
+assignments, projects, and exams across different courses. Traditional planners
+and calendar apps didn't account for the complexity of academic life—varying
+assignment weights, different grading systems, and the need for strategic study
+planning. This project was born from my personal struggle to find a tool that
+could help students like me stay on top of their academic responsibilities while
+maintaining a healthy work-life balance.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### What I Learned
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Building this academic planner has been an incredible learning journey:
 
-## Learn More
+- **Full-Stack Development**: Gained hands-on experience with modern web
+  technologies including Next.js, React, and Convex for backend services
+- **Data Visualization**: Implemented interactive charts using Recharts to
+  provide students with clear insights into their academic performance
+- **Responsive Design**: Ensured the application works seamlessly across
+  different devices and screen sizes
+- **Type Safety**: Leveraged TypeScript to catch errors early and improve code
+  quality
 
-To learn more about Next.js, take a look at the following resources:
+### Technical Implementation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The application is built with:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Frontend**: Next.js 15 with React 19 and TypeScript
+- **UI Components**: shadcn/ui for the foundation of the design system
+- **Data Visualization**: Recharts for interactive and accessible charts
+- **Backend**: Convex for database and serverless functions
+- **Authentication**: Database and auth provided by Convex
+- **Deployment**: Vercel for hosting and continuous deployment
 
-## Deploy on Vercel
+Key features include:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Assignment tracking with due dates and statuses
+- Grade calculation and GPA tracking
+- Interactive performance analytics
+- Responsive design for all devices
+- Secure user accounts with data persistence
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Future Enhancements
+
+- Mobile app development for on-the-go access
+- Integration with popular learning management systems (LMS)
+- AI-powered study recommendations
+- Collaborative features for group projects
+- Advanced analytics and predictive performance tracking
