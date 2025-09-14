@@ -1,13 +1,9 @@
 "use client";
 
-import {
-	IconDashboard,
-	IconInnerShadowTop,
-	IconSettings,
-} from "@tabler/icons-react";
+import { IconDashboard, IconSettings } from "@tabler/icons-react";
 import Link from "next/link";
 import type * as React from "react";
-
+import { Icons } from "@/components/icons";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -56,7 +52,7 @@ export function AppSidebar({
 							className="data-[slot=sidebar-menu-button]:!p-1.5"
 						>
 							<Link href="/">
-								<IconInnerShadowTop className="!size-5" />
+								<Icons.logo className="!size-5" />
 								<span className="text-base font-semibold">Planner</span>
 							</Link>
 						</SidebarMenuButton>
